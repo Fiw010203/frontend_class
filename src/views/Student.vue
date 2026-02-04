@@ -14,6 +14,7 @@
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
+import { API_BASE } from "../api.js"
 
 const router = useRouter()
 const code = ref("")
@@ -24,25 +25,31 @@ const user = JSON.parse(localStorage.getItem("user"))
 
 const checkin = async () => {
   try {
-    const res = await fetch("http://localhost:5000/attendance/checkin", {
+    if (!user || user.role !== "student") {
+      message.value = "❌ กรุณาเข้าสู่ระบบนักศึกษา"
+      return
+    }
+
+    const res = await fetch(`${API_BASE}/attendance/checkin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         studentId: user.id,
-        code: code.value
+        code: code.value.trim()
       })
     })
 
+    const data = await res.json()
+
     if (!res.ok) {
-      // ถ้า backend ตอบ error (เช่น 400, 404) → อ่านเป็น text
-      const text = await res.text()
-      message.value = "❌ Error: " + text
+      message.value = data.message || "❌ เช็คชื่อไม่สำเร็จ"
       return
     }
 
-    const data = await res.json()
     message.value = data.message
+    code.value = ""
   } catch (err) {
+    console.error(err)
     message.value = "❌ เกิดข้อผิดพลาดในการเชื่อมต่อ"
   }
 }
@@ -52,6 +59,7 @@ const logout = () => {
   router.push("/")
 }
 </script>
+
 
 <style scoped>
 .box {

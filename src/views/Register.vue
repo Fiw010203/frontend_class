@@ -10,9 +10,17 @@
       <option value="teacher">อาจารย์</option>
     </select>
 
-    <!-- ช่องกรอก fullname และ student_code เฉพาะนักศึกษา -->
-    <input v-if="role === 'student'" v-model="fullname" placeholder="ชื่อจริง" />
-    <input v-if="role === 'student'" v-model="studentCode" placeholder="รหัสนักศึกษา" />
+    <!-- ช่องกรอกเฉพาะนักศึกษา -->
+    <input
+      v-if="role === 'student'"
+      v-model="fullname"
+      placeholder="ชื่อจริง"
+    />
+    <input
+      v-if="role === 'student'"
+      v-model="studentCode"
+      placeholder="รหัสนักศึกษา"
+    />
 
     <button @click="register">สมัคร</button>
     <button @click="$router.push('/')">กลับ</button>
@@ -25,6 +33,7 @@
 import { ref } from "vue"
 import axios from "axios"
 import { useRouter } from "vue-router"
+import { API_BASE } from "../api.js"
 
 const username = ref("")
 const password = ref("")
@@ -32,33 +41,41 @@ const role = ref("student")
 const fullname = ref("")
 const studentCode = ref("")
 const message = ref("")
+
 const router = useRouter()
 
 const register = async () => {
   try {
-    // เตรียม payload ตาม role
     const payload = {
       username: username.value,
       password: password.value,
       role: role.value
     }
 
-    // ถ้าเป็น student ให้ส่ง fullname และ student_code ไปด้วย
     if (role.value === "student") {
       payload.fullname = fullname.value
       payload.student_code = studentCode.value
     }
 
-    await axios.post("http://localhost:5000/auth/register", payload)
+    await axios.post(
+      `${API_BASE}/auth/register`,
+      payload
+    )
 
     message.value = "✅ สมัครสำเร็จ"
     router.push("/")
   } catch (err) {
-    console.error("REGISTER ERROR:", err.response?.data || err.message)
-    message.value = "❌ สมัครไม่สำเร็จ: " + (err.response?.data?.message || "")
+    console.error(
+      "REGISTER ERROR:",
+      err.response?.data || err.message
+    )
+    message.value =
+      "❌ สมัครไม่สำเร็จ: " +
+      (err.response?.data?.message || "")
   }
 }
 </script>
+
 
 <style scoped>
 .box {

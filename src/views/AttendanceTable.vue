@@ -12,39 +12,47 @@
       <button class="refresh-btn" @click="loadData">รีเฟรช</button>
       <button class="clear-btn" @click="clearDate">ล้างวันที่</button>
     </div>
+
     <button @click="downloadCSV">⬇ ดาวน์โหลดตาราง</button>
 
     <p v-if="message">{{ message }}</p>
 
     <table v-if="rows.length">
-  <thead>
-    <tr>
-      <th>ชื่อ-นามสกุล</th>
-      <th>รหัสนักศึกษา</th>
-      <th>เวลาเช็คชื่อ</th> <!-- ✅ เพิ่ม -->
-      <th>จัดการ</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-for="(row, index) in rows" :key="index">
-      <td>{{ row.fullname }}</td>
-      <td>{{ row.student_code }}</td>
-      <td>{{ formatDate(row.checked_at) }}</td> <!-- ✅ -->
-      <td>
-        <button class="delete-btn" @click="deleteRow(row)">ลบ</button>
-      </td>
-    </tr>
-  </tbody>
-</table>
+      <thead>
+        <tr>
+          <th>ชื่อ-นามสกุล</th>
+          <th>รหัสนักศึกษา</th>
+          <th>เวลาเช็คชื่อ</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, index) in rows" :key="index">
+          <td>{{ row.fullname }}</td>
+          <td>{{ row.student_code }}</td>
+          <td>{{ formatDate(row.checked_at) }}</td>
+          <td>
+            <button class="delete-btn" @click="deleteRow(row)">
+              ลบ
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-    <p v-if="!rows.length && selectedDate && !message">ยังไม่มีข้อมูลสำหรับวันที่ {{ selectedDate }}</p>
-    <p v-else-if="!rows.length && !message">ยังไม่มีข้อมูลนักเรียน</p>
+    <p v-if="!rows.length && selectedDate && !message">
+      ยังไม่มีข้อมูลสำหรับวันที่ {{ selectedDate }}
+    </p>
+    <p v-else-if="!rows.length && !message">
+      ยังไม่มีข้อมูลนักเรียน
+    </p>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
+import { apiPath } from "../api.js"
 
 const router = useRouter()
 const rows = ref([])
@@ -60,34 +68,41 @@ function getTodayLocalDate() {
 }
 
 const loadData = async () => {
+  message.value = ""
+
   try {
-    const url = new URL("http://localhost:5000/attendance/list")
+    const url = new URL(apiPath("/attendance/list"))
+
     if (selectedDate.value) {
       url.searchParams.set("date", selectedDate.value)
     } else {
-      // request all when date is cleared
       url.searchParams.set("date", "all")
     }
+
     const res = await fetch(url.toString())
 
     if (!res.ok) {
       message.value = "❌ โหลดข้อมูลไม่สำเร็จ"
+      rows.value = []
       return
     }
 
     const data = await res.json()
-    rows.value = data.students || []
+    rows.value = data.students || data.data || []
   } catch (err) {
+    console.error("LOAD ATTENDANCE ERROR:", err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
+    rows.value = []
   }
 }
+
 const deleteRow = async (row) => {
   const ok = confirm(`ต้องการลบรายการของ ${row.fullname} ใช่หรือไม่?`)
   if (!ok) return
 
   try {
     const res = await fetch(
-      `http://localhost:5000/attendance/${row.attendance_id}`,
+      apiPath(`/attendance/${row.attendance_id}`),
       { method: "DELETE" }
     )
 
@@ -100,26 +115,34 @@ const deleteRow = async (row) => {
       (item) => item.attendance_id !== row.attendance_id
     )
   } catch (err) {
+    console.error("DELETE ERROR:", err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
   }
 }
+
 const clearDate = () => {
   selectedDate.value = ""
   loadData()
 }
+
 const formatDate = (dateStr) => {
+  if (!dateStr) return "-"
   return new Date(dateStr).toLocaleString("th-TH")
 }
+
 const goBack = () => {
   router.push("/teacher")
 }
+
 const downloadCSV = () => {
-  const url = new URL("http://localhost:5000/attendance/export")
+  const url = new URL(apiPath("/attendance/export"))
+
   if (selectedDate.value) {
     url.searchParams.set("date", selectedDate.value)
   } else {
     url.searchParams.set("date", "all")
   }
+
   window.open(url.toString(), "_blank")
 }
 

@@ -15,6 +15,7 @@
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
+import { API_BASE } from "../api.js"
 
 const router = useRouter()
 
@@ -23,32 +24,39 @@ const password = ref("")
 const message = ref("")
 
 const login = async () => {
-  const res = await fetch("http://localhost:5000/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: username.value,
-      password: password.value
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value
+      })
     })
-  })
 
-  const data = await res.json()
+    const data = await res.json()
 
-  if (!data.success) {
-    message.value = data.message || "❌ Login ไม่ถูกต้อง"
-    return
-  }
+    if (!data.success) {
+      message.value = data.message || "❌ Login ไม่ถูกต้อง"
+      return
+    }
 
-  localStorage.setItem("user", JSON.stringify(data.user))
+    localStorage.setItem("user", JSON.stringify(data.user))
 
-  if (data.user.role === "teacher") {
-    router.push("/teacher")
-  } else {
-    router.push("/student")
+    if (data.user.role === "teacher") {
+      router.push("/teacher")
+    } else {
+      router.push("/student")
+    }
+  } catch (err) {
+    console.error("LOGIN ERROR:", err)
+    message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
   }
 }
-
 </script>
+
 
 <style scoped>
 .box {

@@ -23,22 +23,47 @@
 <script setup>
 import { ref } from "vue"
 import { useRouter } from "vue-router"
+import { API_BASE } from "../api.js"
 
 const router = useRouter()
 const code = ref("")
 const message = ref("")
 
 const generateCode = async () => {
-  const res = await fetch("http://localhost:5000/attendance/generate-code", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  })
-  const data = await res.json()
-  code.value = data.code
+  try {
+    const user = JSON.parse(localStorage.getItem("user"))
+
+    if (!user || user.role !== "teacher") {
+      message.value = "❌ กรุณาเข้าสู่ระบบอาจารย์"
+      return
+    }
+
+    const res = await fetch(`${API_BASE}/attendance/generate-code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        teacherId: user.id
+      })
+    })
+
+    const data = await res.json()
+
+    if (!res.ok || !data.success) {
+      message.value = data.message || "❌ สร้างรหัสไม่สำเร็จ"
+      return
+    }
+
+    code.value = data.code
+    message.value = "✅ สร้างรหัสสำเร็จ"
+  } catch (err) {
+    console.error("GENERATE CODE ERROR:", err)
+    message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+  }
 }
 
 const goToAttendance = () => {
-  // ✅ เปลี่ยนหน้าใหม่ทั้งหน้า
   router.push("/attendance")
 }
 
@@ -47,7 +72,6 @@ const logout = () => {
   router.push("/")
 }
 </script>
-
 
 
 <style scoped>

@@ -21,7 +21,7 @@
         <option value="teacher">👩‍🏫 อาจารย์</option>
       </select>
 
-      <!-- ช่องกรอกเฉพาะนักศึกษา -->
+      <!-- เฉพาะนักศึกษา -->
       <input
         v-if="role === 'student'"
         v-model="fullname"
@@ -36,11 +36,19 @@
         class="input"
       />
 
-      <button class="primary-btn" @click="register">
-        ✅ สมัครสมาชิก
+      <button
+        class="primary-btn"
+        :disabled="loading"
+        @click="register"
+      >
+        {{ loading ? "⏳ กำลังสมัคร..." : "✅ สมัครสมาชิก" }}
       </button>
 
-      <button class="secondary-btn" @click="goBack">
+      <button
+        class="secondary-btn"
+        :disabled="loading"
+        @click="goBack"
+      >
         ⬅ กลับหน้าเข้าสู่ระบบ
       </button>
 
@@ -52,10 +60,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import axios from "axios"
 import { useRouter } from "vue-router"
 import { API_BASE } from "../api.js"
+
+const router = useRouter()
 
 const username = ref("")
 const password = ref("")
@@ -65,12 +75,17 @@ const studentCode = ref("")
 const message = ref("")
 const loading = ref(false)
 
-const router = useRouter()
+/* ---------- reset field เมื่อเปลี่ยน role ---------- */
+watch(role, (r) => {
+  if (r === "teacher") {
+    fullname.value = ""
+    studentCode.value = ""
+  }
+})
 
 const register = async () => {
   message.value = ""
 
-  /* ---------- frontend validate ---------- */
   if (!username.value || !password.value || !role.value) {
     message.value = "⚠️ กรุณากรอกข้อมูลให้ครบ"
     return
@@ -83,7 +98,6 @@ const register = async () => {
     }
   }
 
-  /* ---------- payload ให้ตรง backend ---------- */
   const payload = {
     username: username.value.trim(),
     password: password.value,
@@ -103,7 +117,7 @@ const register = async () => {
       payload
     )
 
-    message.value = res.data?.message || "✅ สมัครสมาชิกสำเร็จ"
+    message.value = res.data?.message || "สมัครสมาชิกสำเร็จ ✅"
     setTimeout(() => router.push("/"), 800)
   } catch (err) {
     console.error("REGISTER ERROR:", err.response?.data || err.message)
@@ -119,6 +133,7 @@ const goBack = () => {
   router.push("/")
 }
 </script>
+
 
 
 <style scoped>

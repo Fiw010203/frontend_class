@@ -2,7 +2,13 @@
   <div class="container">
     <h2>📋 ตารางรายชื่อนักเรียน</h2>
 
-    <button class="back-btn" @click="goBack">⬅ กลับหน้าอาจารย์</button>
+    <button class="back-btn" @click="goBack">
+      ⬅ กลับหน้าอาจารย์
+    </button>
+    <h2>📋 ตารางรายชื่อนักเรียน</h2>
+    <p class="teacher-name">
+      👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+    </p>
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -11,8 +17,13 @@
         <input type="date" v-model="selectedDate" @change="loadData" />
       </label>
 
-      <button class="refresh-btn" @click="loadData">🔄 รีเฟรช</button>
-      <button class="clear-btn" @click="clearDate">❌ ล้างวันที่</button>
+      <button class="refresh-btn" @click="loadData">
+        🔄 รีเฟรช
+      </button>
+
+      <button class="clear-btn" @click="clearDate">
+        ❌ ล้างวันที่
+      </button>
     </div>
 
     <button class="download-btn" @click="downloadCSV">
@@ -32,7 +43,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, index) in rows" :key="index">
+        <tr v-for="row in rows" :key="row.attendance_id">
           <td>{{ row.fullname }}</td>
           <td>{{ row.student_code }}</td>
           <td>{{ formatDate(row.checked_at) }}</td>
@@ -45,10 +56,7 @@
       </tbody>
     </table>
 
-    <p v-if="!rows.length && selectedDate && !message" class="empty">
-      ยังไม่มีข้อมูลสำหรับวันที่ {{ selectedDate }}
-    </p>
-    <p v-else-if="!rows.length && !message" class="empty">
+    <p v-if="!rows.length && !message" class="empty">
       ยังไม่มีข้อมูลนักเรียน
     </p>
   </div>
@@ -60,11 +68,14 @@ import { useRouter } from "vue-router"
 import { apiPath } from "../api.js"
 
 const router = useRouter()
+
 const rows = ref([])
 const message = ref("")
-const selectedDate = ref(getTodayLocalDate())
+const selectedDate = ref(getToday())
+const teacherName = ref("")
 
-function getTodayLocalDate() {
+/* ================= UTILS ================= */
+function getToday() {
   const d = new Date()
   const yyyy = d.getFullYear()
   const mm = String(d.getMonth() + 1).padStart(2, "0")
@@ -72,35 +83,45 @@ function getTodayLocalDate() {
   return `${yyyy}-${mm}-${dd}`
 }
 
+/* ================= LOAD DATA ================= */
 const loadData = async () => {
   message.value = ""
+  rows.value = []
+
+  const user = JSON.parse(localStorage.getItem("user"))
+
+  if (!user || user.role !== "teacher") {
+    message.value = "❌ กรุณาเข้าสู่ระบบอาจารย์"
+    return
+  }
 
   try {
-    const url = new URL(apiPath("/attendance/list"))
+    const url = new URL(
+      apiPath(`/attendance/list/${user.id}`)
+    )
 
-    if (selectedDate.value) {
-      url.searchParams.set("date", selectedDate.value)
-    } else {
-      url.searchParams.set("date", "all")
-    }
+    url.searchParams.set(
+      "date",
+      selectedDate.value ? selectedDate.value : "all"
+    )
 
     const res = await fetch(url.toString())
 
     if (!res.ok) {
       message.value = "❌ โหลดข้อมูลไม่สำเร็จ"
-      rows.value = []
       return
     }
 
     const data = await res.json()
-    rows.value = data.students || data.data || []
+    rows.value = data.students || []
+
   } catch (err) {
     console.error("LOAD ERROR:", err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
-    rows.value = []
   }
 }
 
+/* ================= DELETE ================= */
 const deleteRow = async (row) => {
   const ok = confirm(`ต้องการลบรายการของ ${row.fullname} ใช่หรือไม่?`)
   if (!ok) return
@@ -117,7 +138,7 @@ const deleteRow = async (row) => {
     }
 
     rows.value = rows.value.filter(
-      (item) => item.attendance_id !== row.attendance_id
+      (r) => r.attendance_id !== row.attendance_id
     )
   } catch (err) {
     console.error("DELETE ERROR:", err)
@@ -125,34 +146,47 @@ const deleteRow = async (row) => {
   }
 }
 
+/* ================= CSV ================= */
+const downloadCSV = () => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (!user) return
+
+  const url = new URL(
+    apiPath(`/attendance/export/${user.id}`)
+  )
+
+  url.searchParams.set(
+    "date",
+    selectedDate.value ? selectedDate.value : "all"
+  )
+
+  window.open(url.toString(), "_blank")
+}
+
+/* ================= NAV ================= */
 const clearDate = () => {
   selectedDate.value = ""
   loadData()
 }
 
 const formatDate = (dateStr) => {
-  if (!dateStr) return "-"
   return new Date(dateStr).toLocaleString("th-TH")
 }
 
 const goBack = () => {
   router.push("/teacher")
 }
-
-const downloadCSV = () => {
-  const url = new URL(apiPath("/attendance/export"))
-
-  if (selectedDate.value) {
-    url.searchParams.set("date", selectedDate.value)
-  } else {
-    url.searchParams.set("date", "all")
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (user?.role === "teacher") {
+    teacherName.value = user.fullname || user.username
   }
-
-  window.open(url.toString(), "_blank")
-}
+  loadData()
+})
 
 onMounted(loadData)
 </script>
+
 
 <style scoped>
 /* ===== Layout ===== */
@@ -162,7 +196,7 @@ onMounted(loadData)
   padding: 22px;
   background: #ffffff;
   border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
@@ -185,6 +219,7 @@ button {
   padding: 6px 12px;
   margin-bottom: 10px;
 }
+
 .back-btn:hover {
   background: #d1d5db;
 }
@@ -196,6 +231,7 @@ button {
   border: none;
   padding: 8px 14px;
 }
+
 .download-btn:hover {
   background: #059669;
 }
@@ -229,6 +265,7 @@ button {
   border: none;
   padding: 6px 12px;
 }
+
 .refresh-btn:hover {
   background: #1d4ed8;
 }
@@ -239,6 +276,7 @@ button {
   border: none;
   padding: 6px 12px;
 }
+
 .clear-btn:hover {
   background: #d97706;
 }
@@ -255,7 +293,8 @@ thead {
   background: #f3f4f6;
 }
 
-th, td {
+th,
+td {
   padding: 10px;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -275,6 +314,7 @@ tbody tr:hover {
   border: none;
   padding: 6px 10px;
 }
+
 .delete-btn:hover {
   background: #dc2626;
 }
@@ -301,4 +341,10 @@ tbody tr:hover {
     font-size: 13px;
   }
 }
+.teacher-name {
+  margin-bottom: 10px;
+  color: #374151;
+  font-size: 15px;
+}
+
 </style>

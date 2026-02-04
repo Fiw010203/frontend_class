@@ -7,11 +7,7 @@
         กรุณากรอกรหัสเช็คชื่อจากอาจารย์
       </p>
 
-      <input
-        v-model="code"
-        placeholder="กรอกรหัสเช็คชื่อ"
-        class="code-input"
-      />
+      <input v-model="code" placeholder="กรอกรหัสเช็คชื่อ" class="code-input" />
 
       <button class="checkin-btn" @click="checkin">
         ✅ เช็คชื่อ
@@ -58,9 +54,10 @@ const checkin = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        studentId: user.id,
+        studentId: user.student_id,
         code: code.value.trim()
       })
+
     })
 
     const data = await res.json()
@@ -126,7 +123,7 @@ h2 {
   border-radius: 10px;
   border: 1px solid #d1d5db;
   letter-spacing: 2px;
-  
+
 }
 
 .code-input:focus {
@@ -152,6 +149,7 @@ button {
   background: #10b981;
   color: #ffffff;
 }
+
 .checkin-btn:hover {
   background: #059669;
 }
@@ -160,6 +158,7 @@ button {
   background: #ef4444;
   color: #ffffff;
 }
+
 .logout-btn:hover {
   background: #dc2626;
 }

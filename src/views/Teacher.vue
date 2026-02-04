@@ -2,7 +2,6 @@
   <div class="container">
     <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
 
-    <!-- Card : Generate Code -->
     <section class="card">
       <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
 
@@ -14,19 +13,22 @@
         รหัสเช็คชื่อ: <span>{{ code }}</span>
       </p>
 
+      <p v-if="timeLeft > 0" class="timer">
+        ⏳ เหลือเวลา
+        {{ Math.floor(timeLeft / 60) }}:
+        {{ String(timeLeft % 60).padStart(2, "0") }} นาที
+      </p>
+
       <p v-if="message" class="message">{{ message }}</p>
     </section>
 
-    <!-- Card : Manage Data -->
     <section class="card">
       <h3>📊 จัดการข้อมูล</h3>
-
       <button class="secondary-btn" @click="goToAttendance">
         📋 ดูตารางรายชื่อนักเรียน
       </button>
     </section>
 
-    <!-- Logout -->
     <button class="logout-btn" @click="logout">
       🚪 ออกจากระบบ
     </button>
@@ -34,60 +36,116 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted, onUnmounted } from "vue"
 import { useRouter } from "vue-router"
 import { API_BASE } from "../api.js"
 
 const router = useRouter()
+
 const code = ref("")
 const message = ref("")
+const timeLeft = ref(0)
+let timer = null
 
+/* ================= COUNTDOWN ================= */
+const startCountdown = (expiresAt) => {
+  clearInterval(timer)
+
+  const expireMs = new Date(expiresAt).getTime()
+
+  const update = () => {
+    const diff = Math.floor((expireMs - Date.now()) / 1000)
+    timeLeft.value = diff > 0 ? diff : 0
+
+    if (diff <= 0) {
+      clearInterval(timer)
+      code.value = ""
+      message.value = "⏰ รหัสหมดอายุแล้ว"
+    }
+  }
+
+  update()
+  timer = setInterval(update, 1000)
+}
+
+/* ================= LOAD ACTIVE CODE ================= */
+const loadActiveCode = async () => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (!user) return
+
+  const res = await fetch(
+    `${API_BASE}/attendance/active-code/${user.id}`
+  )
+  const data = await res.json()
+
+  if (data.active) {
+    code.value = data.code
+    message.value = "ℹ️ ใช้รหัสที่ยังไม่หมดอายุ"
+    startCountdown(data.expiresAt)
+  }
+}
+
+/* ================= GENERATE CODE ================= */
 const generateCode = async () => {
   message.value = ""
   code.value = ""
 
   try {
     const user = JSON.parse(localStorage.getItem("user"))
-
     if (!user || user.role !== "teacher") {
       message.value = "❌ กรุณาเข้าสู่ระบบอาจารย์"
       return
     }
 
-    const res = await fetch(`${API_BASE}/attendance/generate-code`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        teacherId: user.id
-      })
-    })
+    const res = await fetch(
+      `${API_BASE}/attendance/generate-code`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ teacherId: user.id })
+      }
+    )
 
     const data = await res.json()
 
-    if (!res.ok || !data.success) {
+    // ✅ กรณียังมีรหัสอยู่ (409)
+    if (res.status === 409 && data.active) {
+      code.value = data.code
+      message.value = "ℹ️ ยังมีรหัสที่ใช้งานอยู่"
+      startCountdown(data.expiresAt)
+      return
+    }
+
+    if (!res.ok) {
       message.value = data.message || "❌ สร้างรหัสไม่สำเร็จ"
       return
     }
 
     code.value = data.code
     message.value = "✅ สร้างรหัสเช็คชื่อเรียบร้อย"
+    startCountdown(data.expiresAt)
+
   } catch (err) {
-    console.error("GENERATE CODE ERROR:", err)
+    console.error(err)
     message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
   }
 }
 
+/* ================= LIFECYCLE ================= */
+onMounted(loadActiveCode)
+onUnmounted(() => clearInterval(timer))
+
+/* ================= NAV ================= */
 const goToAttendance = () => {
   router.push("/attendance")
 }
 
 const logout = () => {
-  localStorage.removeItem("user")
+  localStorage.clear()
   router.push("/")
 }
 </script>
+
 
 <style scoped>
 /* ===== Layout ===== */
@@ -132,6 +190,37 @@ button {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.timer {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff6b00;
+}
+.message {
+  margin-top: 8px;
+}
+.card {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.primary-btn,
+.secondary-btn,
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+}
+
+.code-box {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
 
 .primary-btn {
   background: #2563eb;

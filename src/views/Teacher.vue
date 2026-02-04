@@ -2,21 +2,34 @@
   <div class="container">
     <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
 
+    <!-- Card : Generate Code -->
     <section class="card">
-      <h3>สร้างรหัสเช็คชื่อ</h3>
-      <button @click="generateCode">สร้างรหัส</button>
-      <p v-if="code">รหัส: {{ code }}</p>
-      <p v-if="message">{{ message }}</p>
+      <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
+
+      <button class="primary-btn" @click="generateCode">
+        ➕ สร้างรหัส
+      </button>
+
+      <p v-if="code" class="code-box">
+        รหัสเช็คชื่อ: <span>{{ code }}</span>
+      </p>
+
+      <p v-if="message" class="message">{{ message }}</p>
     </section>
 
+    <!-- Card : Manage Data -->
     <section class="card">
-      <h3>จัดการข้อมูล</h3>
-      <button @click="goToAttendance">
+      <h3>📊 จัดการข้อมูล</h3>
+
+      <button class="secondary-btn" @click="goToAttendance">
         📋 ดูตารางรายชื่อนักเรียน
       </button>
     </section>
 
-    <button class="logout" @click="logout">🚪 Logout</button>
+    <!-- Logout -->
+    <button class="logout-btn" @click="logout">
+      🚪 ออกจากระบบ
+    </button>
   </div>
 </template>
 
@@ -30,6 +43,9 @@ const code = ref("")
 const message = ref("")
 
 const generateCode = async () => {
+  message.value = ""
+  code.value = ""
+
   try {
     const user = JSON.parse(localStorage.getItem("user"))
 
@@ -56,7 +72,7 @@ const generateCode = async () => {
     }
 
     code.value = data.code
-    message.value = "✅ สร้างรหัสสำเร็จ"
+    message.value = "✅ สร้างรหัสเช็คชื่อเรียบร้อย"
   } catch (err) {
     console.error("GENERATE CODE ERROR:", err)
     message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
@@ -73,69 +89,106 @@ const logout = () => {
 }
 </script>
 
-
 <style scoped>
+/* ===== Layout ===== */
 .container {
-  max-width: 800px;
-  margin: auto;
-  padding: 20px;
-  font-family: "Segoe UI", sans-serif;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", system-ui, sans-serif;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 30px;
+  color: #1f2937;
 }
 
+/* ===== Card ===== */
 .card {
-  border: 1px solid #ccc;
+  background: #f9fafb;
+  border-radius: 14px;
   padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  margin-bottom: 24px;
+  box-shadow: inset 0 0 0 1px #e5e7eb;
 }
 
+.card h3 {
+  margin-bottom: 15px;
+  color: #111827;
+}
+
+/* ===== Buttons ===== */
 button {
-  display: block;
   width: 100%;
   padding: 10px;
-  margin-top: 10px;
+  font-size: 15px;
   font-weight: bold;
-  background-color: #007bff;
-  color: white;
+  border-radius: 10px;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-button.logout {
-  background-color: #dc3545;
-  margin-top: 20px;
+.primary-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+.primary-btn:hover {
+  background: #1d4ed8;
 }
 
-button:hover {
-  opacity: 0.9;
+.secondary-btn {
+  background: #10b981;
+  color: #ffffff;
+}
+.secondary-btn:hover {
+  background: #059669;
 }
 
-.code {
-  font-size: 1.2em;
-  font-weight: bold;
+.logout-btn {
+  background: #ef4444;
+  color: #ffffff;
   margin-top: 10px;
 }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
+.logout-btn:hover {
+  background: #dc2626;
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
+/* ===== Code Display ===== */
+.code-box {
+  margin-top: 15px;
+  padding: 12px;
+  background: #eef2ff;
+  border-radius: 10px;
+  font-size: 16px;
   text-align: center;
 }
 
-thead {
-  background-color: #e0e0e0;
+.code-box span {
+  font-weight: bold;
+  color: #1d4ed8;
+  letter-spacing: 2px;
+}
+
+/* ===== Message ===== */
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 18px;
+  }
+
+  button {
+    font-size: 14px;
+  }
 }
 </style>

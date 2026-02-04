@@ -1,14 +1,33 @@
 <template>
-  <div class="box">
-    <h2>Login</h2>
+  <div class="container">
+    <div class="card">
+      <h2>🔐 เข้าสู่ระบบ</h2>
 
-    <input v-model="username" placeholder="Username" />
-    <input v-model="password" type="password" placeholder="Password" />
+      <input
+        v-model="username"
+        placeholder="Username"
+        class="input"
+      />
 
-    <button @click="login">Login</button>
-    <button @click="$router.push('/register')">สมัครสมาชิก</button>
+      <input
+        v-model="password"
+        type="password"
+        placeholder="Password"
+        class="input"
+      />
 
-    <p>{{ message }}</p>
+      <button class="primary-btn" @click="login">
+        🚀 Login
+      </button>
+
+      <button class="secondary-btn" @click="goRegister">
+        📝 สมัครสมาชิก
+      </button>
+
+      <p v-if="message" class="message">
+        {{ message }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -24,7 +43,14 @@ const password = ref("")
 const message = ref("")
 
 const login = async () => {
+  message.value = ""
+
   try {
+    if (!username.value || !password.value) {
+      message.value = "⚠️ กรุณากรอก Username และ Password"
+      return
+    }
+
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
@@ -39,7 +65,7 @@ const login = async () => {
     const data = await res.json()
 
     if (!data.success) {
-      message.value = data.message || "❌ Login ไม่ถูกต้อง"
+      message.value = data.message || "❌ Username หรือ Password ไม่ถูกต้อง"
       return
     }
 
@@ -55,18 +81,88 @@ const login = async () => {
     message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
   }
 }
+
+const goRegister = () => {
+  router.push("/register")
+}
 </script>
 
-
 <style scoped>
-.box {
-  width: 300px;
-  margin: auto;
-  border: 1px solid #ccc;
-  padding: 20px;
+/* ===== Layout ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f4f6;
+  font-family: "Segoe UI", system-ui, sans-serif;
 }
-input, button {
+
+/* ===== Card ===== */
+.card {
   width: 100%;
-  margin-top: 8px;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 18px;
+  color: #1f2937;
+}
+
+/* ===== Inputs ===== */
+.input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== Buttons ===== */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+.secondary-btn {
+  background: #10b981;
+  color: #ffffff;
+}
+.secondary-btn:hover {
+  background: #059669;
+}
+
+/* ===== Message ===== */
+.message {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #dc2626;
 }
 </style>

@@ -2,21 +2,26 @@
   <div class="container">
     <h2>📋 ตารางรายชื่อนักเรียน</h2>
 
-    <button @click="goBack">⬅ กลับหน้าอาจารย์</button>
+    <button class="back-btn" @click="goBack">⬅ กลับหน้าอาจารย์</button>
 
+    <!-- Toolbar -->
     <div class="toolbar">
       <label>
-        เลือกวันที่:
+        📅 เลือกวันที่:
         <input type="date" v-model="selectedDate" @change="loadData" />
       </label>
-      <button class="refresh-btn" @click="loadData">รีเฟรช</button>
-      <button class="clear-btn" @click="clearDate">ล้างวันที่</button>
+
+      <button class="refresh-btn" @click="loadData">🔄 รีเฟรช</button>
+      <button class="clear-btn" @click="clearDate">❌ ล้างวันที่</button>
     </div>
 
-    <button @click="downloadCSV">⬇ ดาวน์โหลดตาราง</button>
+    <button class="download-btn" @click="downloadCSV">
+      ⬇ ดาวน์โหลดตาราง (CSV)
+    </button>
 
-    <p v-if="message">{{ message }}</p>
+    <p v-if="message" class="message">{{ message }}</p>
 
+    <!-- Table -->
     <table v-if="rows.length">
       <thead>
         <tr>
@@ -33,17 +38,17 @@
           <td>{{ formatDate(row.checked_at) }}</td>
           <td>
             <button class="delete-btn" @click="deleteRow(row)">
-              ลบ
+              🗑 ลบ
             </button>
           </td>
         </tr>
       </tbody>
     </table>
 
-    <p v-if="!rows.length && selectedDate && !message">
+    <p v-if="!rows.length && selectedDate && !message" class="empty">
       ยังไม่มีข้อมูลสำหรับวันที่ {{ selectedDate }}
     </p>
-    <p v-else-if="!rows.length && !message">
+    <p v-else-if="!rows.length && !message" class="empty">
       ยังไม่มีข้อมูลนักเรียน
     </p>
   </div>
@@ -90,7 +95,7 @@ const loadData = async () => {
     const data = await res.json()
     rows.value = data.students || data.data || []
   } catch (err) {
-    console.error("LOAD ATTENDANCE ERROR:", err)
+    console.error("LOAD ERROR:", err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
     rows.value = []
   }
@@ -149,44 +154,151 @@ const downloadCSV = () => {
 onMounted(loadData)
 </script>
 
-
 <style scoped>
+/* ===== Layout ===== */
+.container {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 22px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+h2 {
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+/* ===== Buttons ===== */
+button {
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn {
+  background: #e5e7eb;
+  border: none;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+}
+.back-btn:hover {
+  background: #d1d5db;
+}
+
+.download-btn {
+  margin-top: 10px;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+}
+.download-btn:hover {
+  background: #059669;
+}
+
+/* ===== Toolbar ===== */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+
+.toolbar label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.toolbar input[type="date"] {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.refresh-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+}
+.refresh-btn:hover {
+  background: #1d4ed8;
+}
+
+.clear-btn {
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+}
+.clear-btn:hover {
+  background: #d97706;
+}
+
+/* ===== Table ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 15px;
+  font-size: 14px;
 }
+
+thead {
+  background: #f3f4f6;
+}
+
 th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
+  padding: 10px;
+  border-bottom: 1px solid #e5e7eb;
 }
+
 th {
-  background: #f0f0f0;
+  color: #374151;
 }
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0;
+
+tbody tr:hover {
+  background: #f9fafb;
 }
-.refresh-btn {
-  background: #2f6feb;
-  color: #fff;
-  border: none;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-.refresh-btn:hover {
-  background: #2558c7;
-}
+
+/* ===== Delete ===== */
 .delete-btn {
-  background: #e5484d;
+  background: #ef4444;
   color: #fff;
   border: none;
   padding: 6px 10px;
-  cursor: pointer;
 }
 .delete-btn:hover {
-  background: #c4353a;
+  background: #dc2626;
+}
+
+/* ===== Message ===== */
+.message {
+  margin-top: 10px;
+  color: #dc2626;
+}
+
+.empty {
+  margin-top: 15px;
+  color: #6b7280;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table {
+    font-size: 13px;
+  }
 }
 </style>

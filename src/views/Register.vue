@@ -1,31 +1,53 @@
 <template>
-  <div class="box">
-    <h2>Register</h2>
+  <div class="container">
+    <div class="card">
+      <h2>📝 สมัครสมาชิก</h2>
 
-    <input v-model="username" placeholder="Username" />
-    <input v-model="password" type="password" placeholder="Password" />
+      <input
+        v-model="username"
+        placeholder="Username"
+        class="input"
+      />
 
-    <select v-model="role">
-      <option value="student">นักศึกษา</option>
-      <option value="teacher">อาจารย์</option>
-    </select>
+      <input
+        v-model="password"
+        type="password"
+        placeholder="Password"
+        class="input"
+      />
 
-    <!-- ช่องกรอกเฉพาะนักศึกษา -->
-    <input
-      v-if="role === 'student'"
-      v-model="fullname"
-      placeholder="ชื่อจริง"
-    />
-    <input
-      v-if="role === 'student'"
-      v-model="studentCode"
-      placeholder="รหัสนักศึกษา"
-    />
+      <select v-model="role" class="input">
+        <option value="student">🎓 นักศึกษา</option>
+        <option value="teacher">👩‍🏫 อาจารย์</option>
+      </select>
 
-    <button @click="register">สมัคร</button>
-    <button @click="$router.push('/')">กลับ</button>
+      <!-- ช่องกรอกเฉพาะนักศึกษา -->
+      <input
+        v-if="role === 'student'"
+        v-model="fullname"
+        placeholder="ชื่อ - นามสกุล"
+        class="input"
+      />
 
-    <p>{{ message }}</p>
+      <input
+        v-if="role === 'student'"
+        v-model="studentCode"
+        placeholder="รหัสนักศึกษา"
+        class="input"
+      />
+
+      <button class="primary-btn" @click="register">
+        ✅ สมัครสมาชิก
+      </button>
+
+      <button class="secondary-btn" @click="goBack">
+        ⬅ กลับหน้าเข้าสู่ระบบ
+      </button>
+
+      <p v-if="message" class="message">
+        {{ message }}
+      </p>
+    </div>
   </div>
 </template>
 
@@ -45,7 +67,19 @@ const message = ref("")
 const router = useRouter()
 
 const register = async () => {
+  message.value = ""
+
   try {
+    if (!username.value || !password.value) {
+      message.value = "⚠️ กรุณากรอก Username และ Password"
+      return
+    }
+
+    if (role.value === "student" && (!fullname.value || !studentCode.value)) {
+      message.value = "⚠️ กรุณากรอกข้อมูลนักศึกษาให้ครบ"
+      return
+    }
+
     const payload = {
       username: username.value,
       password: password.value,
@@ -57,35 +91,99 @@ const register = async () => {
       payload.student_code = studentCode.value
     }
 
-    await axios.post(
-      `${API_BASE}/auth/register`,
-      payload
-    )
+    await axios.post(`${API_BASE}/auth/register`, payload)
 
-    message.value = "✅ สมัครสำเร็จ"
-    router.push("/")
+    message.value = "✅ สมัครสมาชิกสำเร็จ"
+    setTimeout(() => router.push("/"), 800)
   } catch (err) {
-    console.error(
-      "REGISTER ERROR:",
-      err.response?.data || err.message
-    )
+    console.error("REGISTER ERROR:", err.response?.data || err.message)
     message.value =
       "❌ สมัครไม่สำเร็จ: " +
-      (err.response?.data?.message || "")
+      (err.response?.data?.message || "เกิดข้อผิดพลาด")
   }
+}
+
+const goBack = () => {
+  router.push("/")
 }
 </script>
 
-
 <style scoped>
-.box {
-  width: 300px;
-  margin: auto;
-  border: 1px solid #ccc;
-  padding: 20px;
+/* ===== Layout ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f3f4f6;
+  font-family: "Segoe UI", system-ui, sans-serif;
 }
-input, select, button {
+
+/* ===== Card ===== */
+.card {
   width: 100%;
-  margin-top: 8px;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 18px;
+  color: #1f2937;
+}
+
+/* ===== Inputs ===== */
+.input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* ===== Buttons ===== */
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primary-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+.secondary-btn {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+.secondary-btn:hover {
+  background: #d1d5db;
+}
+
+/* ===== Message ===== */
+.message {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #374151;
 }
 </style>

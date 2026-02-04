@@ -63,43 +63,55 @@ const role = ref("student")
 const fullname = ref("")
 const studentCode = ref("")
 const message = ref("")
+const loading = ref(false)
 
 const router = useRouter()
 
 const register = async () => {
   message.value = ""
 
-  try {
-    if (!username.value || !password.value) {
-      message.value = "⚠️ กรุณากรอก Username และ Password"
-      return
-    }
+  /* ---------- frontend validate ---------- */
+  if (!username.value || !password.value || !role.value) {
+    message.value = "⚠️ กรุณากรอกข้อมูลให้ครบ"
+    return
+  }
 
-    if (role.value === "student" && (!fullname.value || !studentCode.value)) {
+  if (role.value === "student") {
+    if (!fullname.value || !studentCode.value) {
       message.value = "⚠️ กรุณากรอกข้อมูลนักศึกษาให้ครบ"
       return
     }
+  }
 
-    const payload = {
-      username: username.value,
-      password: password.value,
-      role: role.value
-    }
+  /* ---------- payload ให้ตรง backend ---------- */
+  const payload = {
+    username: username.value.trim(),
+    password: password.value,
+    role: role.value
+  }
 
-    if (role.value === "student") {
-      payload.fullname = fullname.value
-      payload.student_code = studentCode.value
-    }
+  if (role.value === "student") {
+    payload.fullname = fullname.value.trim()
+    payload.student_code = studentCode.value.trim()
+  }
 
-    await axios.post(`${API_BASE}/auth/register`, payload)
+  try {
+    loading.value = true
 
-    message.value = "✅ สมัครสมาชิกสำเร็จ"
+    const res = await axios.post(
+      `${API_BASE}/auth/register`,
+      payload
+    )
+
+    message.value = res.data?.message || "✅ สมัครสมาชิกสำเร็จ"
     setTimeout(() => router.push("/"), 800)
   } catch (err) {
     console.error("REGISTER ERROR:", err.response?.data || err.message)
     message.value =
       "❌ สมัครไม่สำเร็จ: " +
       (err.response?.data?.message || "เกิดข้อผิดพลาด")
+  } finally {
+    loading.value = false
   }
 }
 
@@ -107,6 +119,7 @@ const goBack = () => {
   router.push("/")
 }
 </script>
+
 
 <style scoped>
 /* ===== Layout ===== */

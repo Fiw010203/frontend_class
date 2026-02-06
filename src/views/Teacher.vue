@@ -1,17 +1,25 @@
 <template>
   <div class="container">
-    <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
+    <!-- ===== Header ===== -->
+    <div class="header">
+      <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
+      <p class="teacher-name">
+        👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+      </p>
+    </div>
 
+    <!-- ===== Generate Code ===== -->
     <section class="card">
       <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
 
       <button class="primary-btn" @click="generateCode">
-        ➕ สร้างรหัส
+        ➕ สร้างรหัสเช็คชื่อ
       </button>
 
-      <p v-if="code" class="code-box">
-        รหัสเช็คชื่อ: <span>{{ code }}</span>
-      </p>
+      <div v-if="code" class="code-box">
+        <p>รหัสเช็คชื่อ</p>
+        <span>{{ code }}</span>
+      </div>
 
       <p v-if="timeLeft > 0" class="timer">
         ⏳ เหลือเวลา
@@ -22,6 +30,7 @@
       <p v-if="message" class="message">{{ message }}</p>
     </section>
 
+    <!-- ===== Manage ===== -->
     <section class="card">
       <h3>📊 จัดการข้อมูล</h3>
       <button class="secondary-btn" @click="goToAttendance">
@@ -29,6 +38,7 @@
       </button>
     </section>
 
+    <!-- ===== Logout ===== -->
     <button class="logout-btn" @click="logout">
       🚪 ออกจากระบบ
     </button>
@@ -45,6 +55,8 @@ const router = useRouter()
 const code = ref("")
 const message = ref("")
 const timeLeft = ref(0)
+const teacherName = ref("")
+
 let timer = null
 
 /* ================= COUNTDOWN ================= */
@@ -108,16 +120,9 @@ const generateCode = async () => {
 
     const data = await res.json()
 
-    // ✅ กรณียังมีรหัสอยู่ (409)
-    if (res.status === 409 && data.active) {
+    if (!res.ok && data.active) {
       code.value = data.code
-      message.value = "ℹ️ ยังมีรหัสที่ใช้งานอยู่"
       startCountdown(data.expiresAt)
-      return
-    }
-
-    if (!res.ok) {
-      message.value = data.message || "❌ สร้างรหัสไม่สำเร็จ"
       return
     }
 
@@ -132,7 +137,14 @@ const generateCode = async () => {
 }
 
 /* ================= LIFECYCLE ================= */
-onMounted(loadActiveCode)
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (user?.role === "teacher") {
+    teacherName.value = user.fullname || user.username
+  }
+  loadActiveCode()
+})
+
 onUnmounted(() => clearInterval(timer))
 
 /* ================= NAV ================= */
@@ -146,23 +158,32 @@ const logout = () => {
 }
 </script>
 
-
 <style scoped>
 /* ===== Layout ===== */
 .container {
   max-width: 900px;
   margin: 40px auto;
-  padding: 24px;
+  padding: 28px;
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-h2 {
+/* ===== Header ===== */
+.header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+}
+
+.header h2 {
+  margin-bottom: 6px;
   color: #1f2937;
+}
+
+.teacher-name {
+  color: #4b5563;
+  font-size: 15px;
 }
 
 /* ===== Card ===== */
@@ -170,57 +191,26 @@ h2 {
   background: #f9fafb;
   border-radius: 14px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   box-shadow: inset 0 0 0 1px #e5e7eb;
 }
 
 .card h3 {
-  margin-bottom: 15px;
+  margin-bottom: 14px;
   color: #111827;
 }
 
 /* ===== Buttons ===== */
 button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 15px;
   font-weight: bold;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.timer {
-  margin-top: 8px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: #ff6b00;
-}
-.message {
-  margin-top: 8px;
-}
-.card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 10px;
-  margin-bottom: 16px;
-}
-
-.primary-btn,
-.secondary-btn,
-.logout-btn {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-}
-
-.code-box {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
 
 .primary-btn {
   background: #2563eb;
@@ -241,31 +231,40 @@ button {
 .logout-btn {
   background: #ef4444;
   color: #ffffff;
-  margin-top: 10px;
 }
 .logout-btn:hover {
   background: #dc2626;
 }
 
-/* ===== Code Display ===== */
+/* ===== Code ===== */
 .code-box {
-  margin-top: 15px;
-  padding: 12px;
+  margin-top: 16px;
+  padding: 16px;
   background: #eef2ff;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 12px;
   text-align: center;
 }
 
 .code-box span {
+  display: block;
+  font-size: 28px;
   font-weight: bold;
   color: #1d4ed8;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
-/* ===== Message ===== */
+/* ===== Timer & Message ===== */
+.timer {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff6b00;
+}
+
 .message {
   margin-top: 10px;
+  text-align: center;
   font-size: 14px;
   color: #374151;
 }
@@ -273,11 +272,7 @@ button {
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .container {
-    padding: 18px;
-  }
-
-  button {
-    font-size: 14px;
+    padding: 20px;
   }
 }
 </style>

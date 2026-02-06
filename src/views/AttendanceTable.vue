@@ -126,6 +126,7 @@
     </table>
 
     <!-- ===== Empty ===== -->
+    <!-- ===== Empty ===== -->
     <p v-if="!rows.length && !message" class="empty">
       ยังไม่มีข้อมูลนักเรียน
     </p>

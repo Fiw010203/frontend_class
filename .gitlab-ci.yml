@@ -10,6 +10,6 @@ deploy-preview:
     VERCEL_PROJECT_ID: $VERCEL_PROJECT_ID_X
   script:
     - npm install --global vercel
-    - vercel pull --yes  --token="$TOKEN"
+    - vercel pull --yes --token="$TOKEN"
     - vercel build --token="$TOKEN"
-    - vercel deploy --prebuilt --token="$TOKEN"
+    - vercel deploy --prebuilt --prod --token="$TOKEN"

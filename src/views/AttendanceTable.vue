@@ -232,28 +232,30 @@ const loadData = async () => {
 
 /* ================= DELETE ================= */
 const deleteRow = async (row) => {
-  const ok = confirm(`ต้องการลบรายการของ ${row.fullname} ใช่หรือไม่?`)
+  const ok = confirm(`ถอนรายชื่อ ${row.fullname} ออกจากคลาสใช่ไหม?`)
   if (!ok) return
 
   try {
     const res = await fetch(
-      apiPath(`/attendance/${row.attendance_id}`),
+      apiPath(`/attendance/student/${row.student_id}`),
       { method: "DELETE" }
     )
 
     if (!res.ok) {
-      message.value = "❌ ลบรายการไม่สำเร็จ"
+      message.value = "❌ ถอนรายชื่อไม่สำเร็จ"
       return
     }
 
+    // เอาออกจากตารางทันที
     rows.value = rows.value.filter(
-      (r) => r.attendance_id !== row.attendance_id
+      r => r.student_id !== row.student_id
     )
   } catch (err) {
-    console.error("DELETE ERROR:", err)
+    console.error(err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
   }
 }
+
 
 /* ================= CSV ================= */
 const downloadCSV = () => {

@@ -124,7 +124,7 @@
         </tr>
       </tbody>
     </table>
-
+    <!-- ===== Empty ===== -->
     <!-- ===== Empty ===== -->
     <!-- ===== Empty ===== -->
     <p v-if="!rows.length && !message" class="empty">

@@ -270,6 +270,7 @@ button {
 }
 
 /* ===== Responsive ===== */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
   .container {
     padding: 20px;

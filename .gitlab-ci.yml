@@ -12,4 +12,4 @@ deploy-preview:
     - npm install --global vercel
     - vercel pull --yes --token="$TOKEN"
     - vercel build --token="$TOKEN"
-    - vercel deploy --prebuilt --prod --token="$TOKEN"
+    - vercel deploy --prod --token="$TOKEN"

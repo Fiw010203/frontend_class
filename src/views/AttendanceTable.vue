@@ -89,37 +89,23 @@
 
           <!-- จัดการ -->
           <td class="action-col">
-            <button
-              v-if="!row.editing && row.attendance_id"
-              class="edit-btn"
-              @click="editRow(row)"
-            >
+            <button v-if="!row.editing" class="edit-btn" @click="editRow(row)">
               ✏️ แก้ไข
             </button>
 
-            <button
-              v-if="row.editing"
-              class="save-btn"
-              @click="saveRow(row)"
-            >
+
+            <button v-if="row.editing" class="save-btn" @click="saveRow(row)">
               💾 บันทึก
             </button>
 
-            <button
-              v-if="row.editing"
-              class="cancel-btn"
-              @click="cancelEdit(row)"
-            >
+            <button v-if="row.editing" class="cancel-btn" @click="cancelEdit(row)">
               ❌ ยกเลิก
             </button>
 
-            <button
-              v-if="!row.editing && row.attendance_id"
-              class="delete-btn"
-              @click="deleteRow(row)"
-            >
+            <button v-if="!row.editing" class="delete-btn" @click="deleteRow(row)">
               🗑 ลบ
             </button>
+
           </td>
         </tr>
       </tbody>
@@ -307,31 +293,65 @@ const cancelEdit = (row) => {
 
 const saveRow = async (row) => {
   try {
-    const res = await fetch(
-      apiPath(`/attendance/${row.attendance_id}`),
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          status: row.status // แก้ได้แค่นี้
-        })
-      }
-    )
 
-    if (!res.ok) {
-      alert("❌ แก้ไขไม่สำเร็จ")
-      return
+    // ถ้ายังไม่มี attendance_id → ใช้ API สร้างใหม่
+    if (!row.attendance_id) {
+
+      const user = JSON.parse(localStorage.getItem("user"))
+
+      const res = await fetch(
+        apiPath(`/attendance/update-status`),
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            studentId: row.student_id,
+            status: row.status,
+            teacherId: user.id,
+            date: selectedDate.value
+          })
+        }
+      )
+
+      if (!res.ok) {
+        alert("❌ แก้ไขไม่สำเร็จ")
+        return
+      }
+
+    } else {
+
+      // ถ้ามีอยู่แล้ว → update ปกติ
+      const res = await fetch(
+        apiPath(`/attendance/${row.attendance_id}`),
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            status: row.status
+          })
+        }
+      )
+
+      if (!res.ok) {
+        alert("❌ แก้ไขไม่สำเร็จ")
+        return
+      }
     }
 
     row.editing = false
     message.value = "✅ แก้ไขสถานะเรียบร้อย"
+    loadData() // รีโหลดเพื่อเอา attendance_id ใหม่
+
   } catch (err) {
     console.error("EDIT ERROR:", err)
     alert("❌ เชื่อมต่อ backend ไม่ได้")
   }
 }
+
 
 onMounted(loadData)
 </script>
@@ -343,10 +363,12 @@ onMounted(loadData)
   color: #16a34a;
   font-weight: 600;
 }
+
 .absent {
   color: #dc2626;
   font-weight: 600;
 }
+
 .leave {
   color: #d97706;
   font-weight: 600;
@@ -388,6 +410,7 @@ button {
   padding: 6px 14px;
   margin-bottom: 12px;
 }
+
 .back-btn:hover {
   background: #d1d5db;
 }
@@ -398,6 +421,7 @@ button {
   color: #fff;
   padding: 8px 16px;
 }
+
 .download-btn:hover {
   background: #059669;
 }
@@ -431,6 +455,7 @@ button {
   color: #fff;
   padding: 6px 14px;
 }
+
 .refresh-btn:hover {
   background: #1d4ed8;
 }
@@ -440,6 +465,7 @@ button {
   color: #fff;
   padding: 6px 14px;
 }
+
 .clear-btn:hover {
   background: #d97706;
 }
@@ -477,16 +503,24 @@ tbody tr:hover {
 
 /* ===== Column Width ===== */
 th:nth-child(1),
-td:nth-child(1) { width: 26%; }
+td:nth-child(1) {
+  width: 26%;
+}
 
 th:nth-child(2),
-td:nth-child(2) { width: 18%; }
+td:nth-child(2) {
+  width: 18%;
+}
 
 th:nth-child(3),
-td:nth-child(3) { width: 14%; }
+td:nth-child(3) {
+  width: 14%;
+}
 
 th:nth-child(4),
-td:nth-child(4) { width: 22%; }
+td:nth-child(4) {
+  width: 22%;
+}
 
 th:nth-child(5),
 td:nth-child(5) {
@@ -499,16 +533,19 @@ td:nth-child(5) {
   background: #facc15;
   padding: 6px 10px;
 }
+
 .save-btn {
   background: #22c55e;
   color: #fff;
   padding: 6px 10px;
 }
+
 .cancel-btn {
   background: #ef4444;
   color: #fff;
   padding: 6px 10px;
 }
+
 .delete-btn {
   background: #dc2626;
   color: #fff;
@@ -543,4 +580,3 @@ td button {
   }
 }
 </style>
-

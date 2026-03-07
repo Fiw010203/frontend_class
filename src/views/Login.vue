@@ -4,9 +4,7 @@
 
       <!-- LEFT SIDE -->
       <div class="left">
-        <div class="circle">
-          <span class="icon">💻</span>
-        </div>
+        <img src="../student.png" class="login-img" />
       </div>
 
       <!-- RIGHT SIDE -->
@@ -116,10 +114,16 @@ const goRegister = () => {
 /* ===== Left Side ===== */
 .left {
   width: 50%;
-  background: #f3f4f6;
+  background: white;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.login-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .circle {
@@ -154,16 +158,17 @@ h2 {
 .input {
   width: 100%;
   padding: 12px;
-  margin-top: 12px;
+  margin-top: 14px;
   border-radius: 25px;
   border: none;
-  background: #e5e7eb;
   font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
 
 .input:focus {
   outline: none;
-  background: #d1d5db;
+  background: #c6ced5;
 }
 
 /* ===== Buttons ===== */
@@ -173,8 +178,8 @@ button {
   margin-top: 14px;
   border-radius: 25px;
   border: none;
-  font-weight: bold;
-  cursor: pointer;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .primary-btn {

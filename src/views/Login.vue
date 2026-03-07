@@ -1,32 +1,35 @@
 <template>
   <div class="container">
     <div class="card">
-      <h2>🔐 เข้าสู่ระบบ</h2>
 
-      <input
-        v-model="username"
-        placeholder="Username"
-        class="input"
-      />
+      <!-- LEFT SIDE -->
+      <div class="left">
+        <div class="circle">
+          <span class="icon">💻</span>
+        </div>
+      </div>
 
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        class="input"
-      />
+      <!-- RIGHT SIDE -->
+      <div class="right">
+        <h2>🔐 Student Login</h2>
 
-      <button class="primary-btn" @click="login">
-        🚀 Login
-      </button>
+        <input v-model="username" placeholder="Username" class="input" />
 
-      <button class="secondary-btn" @click="goRegister">
-        📝 สมัครสมาชิก
-      </button>
+        <input v-model="password" type="password" placeholder="Password" class="input" />
 
-      <p v-if="message" class="message">
-        {{ message }}
-      </p>
+        <button class="primary-btn" @click="login">
+          🚀 Login
+        </button>
+
+        <button class="secondary-btn" @click="goRegister">
+          📝 สมัครสมาชิก
+        </button>
+
+        <p v-if="message" class="message">
+          {{ message }}
+        </p>
+      </div>
+
     </div>
   </div>
 </template>
@@ -90,44 +93,77 @@ const goRegister = () => {
 <style scoped>
 /* ===== Layout ===== */
 .container {
+  width: 100%;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f3f4f6;
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
 /* ===== Card ===== */
 .card {
-  width: 100%;
-  max-width: 500px;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 18px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  width: 900px;
+  height: 420px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Left Side ===== */
+.left {
+  width: 50%;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle {
+  width: 180px;
+  height: 180px;
+  background: #e5e7eb;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon {
+  font-size: 60px;
+}
+
+/* ===== Right Side ===== */
+.right {
+  width: 50%;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 h2 {
-  margin-bottom: 18px;
-  color: #1f2937;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 /* ===== Inputs ===== */
 .input {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
+  margin-top: 12px;
+  border-radius: 25px;
+  border: none;
+  background: #e5e7eb;
   font-size: 14px;
 }
 
 .input:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  background: #d1d5db;
 }
 
 /* ===== Buttons ===== */
@@ -135,28 +171,28 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 14px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: bold;
+  border-radius: 25px;
   border: none;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
 .primary-btn {
-  background: #2563eb;
-  color: #ffffff;
+  background: #4caf50;
+  color: white;
 }
+
 .primary-btn:hover {
-  background: #1d4ed8;
+  background: #43a047;
 }
 
 .secondary-btn {
-  background: #10b981;
-  color: #ffffff;
+  background: #9ca3af;
+  color: white;
 }
+
 .secondary-btn:hover {
-  background: #059669;
+  background: #6b7280;
 }
 
 /* ===== Message ===== */

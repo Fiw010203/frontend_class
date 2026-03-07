@@ -3,18 +3,9 @@
     <div class="card">
       <h2>📝 สมัครสมาชิก</h2>
 
-      <input
-        v-model="username"
-        placeholder="Username"
-        class="input"
-      />
+      <input v-model="username" placeholder="Username" class="input" />
 
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        class="input"
-      />
+      <input v-model="password" type="password" placeholder="Password" class="input" />
 
       <select v-model="role" class="input">
         <option value="student">🎓 นักศึกษา</option>
@@ -22,33 +13,15 @@
       </select>
 
       <!-- เฉพาะนักศึกษา -->
-      <input
-        v-if="role === 'student'"
-        v-model="fullname"
-        placeholder="ชื่อ - นามสกุล"
-        class="input"
-      />
+      <input v-if="role === 'student'" v-model="fullname" placeholder="ชื่อ - นามสกุล" class="input" />
 
-      <input
-        v-if="role === 'student'"
-        v-model="studentCode"
-        placeholder="รหัสนักศึกษา"
-        class="input"
-      />
+      <input v-if="role === 'student'" v-model="studentCode" placeholder="รหัสนักศึกษา" class="input" />
 
-      <button
-        class="primary-btn"
-        :disabled="loading"
-        @click="register"
-      >
+      <button class="primary-btn" :disabled="loading" @click="register">
         {{ loading ? "⏳ กำลังสมัคร..." : "✅ สมัครสมาชิก" }}
       </button>
 
-      <button
-        class="secondary-btn"
-        :disabled="loading"
-        @click="goBack"
-      >
+      <button class="secondary-btn" :disabled="loading" @click="goBack">
         ⬅ กลับหน้าเข้าสู่ระบบ
       </button>
 
@@ -143,7 +116,7 @@ const goBack = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f3f4f6;
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
@@ -167,10 +140,12 @@ h2 {
 .input {
   width: 100%;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #d1d5db;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
   font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
 
 .input:focus {
@@ -179,23 +154,38 @@ h2 {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+option {
+  padding: 10px;
+  background-color: white;
+  color: #333;
+}
+
+option:hover {
+  background-color: #e6f0ff;
+}
+
+option:checked {
+  background-color: #2d7ef7;
+  color: white;
+}
+
 /* ===== Buttons ===== */
 button {
   width: 100%;
   padding: 12px;
   margin-top: 14px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: bold;
+  border-radius: 25px;
   border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
 
 .primary-btn {
   background: #2563eb;
   color: #ffffff;
 }
+
 .primary-btn:hover {
   background: #1d4ed8;
 }
@@ -204,6 +194,7 @@ button {
   background: #e5e7eb;
   color: #1f2937;
 }
+
 .secondary-btn:hover {
   background: #d1d5db;
 }

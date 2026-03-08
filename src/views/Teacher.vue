@@ -230,6 +230,7 @@ button {
   width: 100%;
   padding: 10px;
   margin-top: 8px;
+  
 }
 
 .code-box {
@@ -240,12 +241,12 @@ button {
 
 
 .primary-btn {
-  background: #2563eb;
+  background: linear-gradient(90deg, #b94cc6, #1de0c9);
   color: #ffffff;
 }
 
 .primary-btn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(90deg, #973fa1, #16ab99);
 }
 
 .secondary-btn {

@@ -1,37 +1,41 @@
 <template>
   <div class="container">
-    <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
+    <div class="card">
+      <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
 
-    <section class="card">
-      <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
+      <section class="section-card">
+        <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
 
-      <button class="primary-btn" @click="generateCode">
-        ➕ สร้างรหัส
+        <button class="primary-btn" @click="generateCode">
+          ➕ สร้างรหัส
+        </button>
+
+        <p v-if="code" class="code-box">
+          รหัสเช็คชื่อ: <span>{{ code }}</span>
+        </p>
+
+        <p v-if="timeLeft > 0" class="timer">
+          ⏳ เหลือเวลา
+          {{ Math.floor(timeLeft / 60) }}:
+          {{ String(timeLeft % 60).padStart(2, "0") }} นาที
+        </p>
+
+        <p v-if="message" class="message">{{ message }}</p>
+      </section>
+
+      <section class="section-card">
+        <h3>📊 จัดการข้อมูล</h3>
+        <button class="secondary-btn" @click="goToAttendance">
+          📋 ดูตารางรายชื่อนักเรียน
+        </button>
+      </section>
+
+      <section class="section-card1">
+      <button class="logout-btn" @click="logout">
+        🚪 ออกจากระบบ
       </button>
-
-      <p v-if="code" class="code-box">
-        รหัสเช็คชื่อ: <span>{{ code }}</span>
-      </p>
-
-      <p v-if="timeLeft > 0" class="timer">
-        ⏳ เหลือเวลา
-        {{ Math.floor(timeLeft / 60) }}:
-        {{ String(timeLeft % 60).padStart(2, "0") }} นาที
-      </p>
-
-      <p v-if="message" class="message">{{ message }}</p>
-    </section>
-
-    <section class="card">
-      <h3>📊 จัดการข้อมูล</h3>
-      <button class="secondary-btn" @click="goToAttendance">
-        📋 ดูตารางรายชื่อนักเรียน
-      </button>
-    </section>
-
-    <button class="logout-btn" @click="logout">
-      🚪 ออกจากระบบ
-    </button>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -150,13 +154,37 @@ const logout = () => {
 <style scoped>
 /* ===== Layout ===== */
 .container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 24px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
   font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.section-card {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.section-card1 {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
 }
 
 h2 {
@@ -166,13 +194,6 @@ h2 {
 }
 
 /* ===== Card ===== */
-.card {
-  background: #f9fafb;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 24px;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
-}
 
 .card h3 {
   margin-bottom: 15px;
@@ -182,14 +203,15 @@ h2 {
 /* ===== Buttons ===== */
 button {
   width: 100%;
-  padding: 10px;
-  font-size: 15px;
-  font-weight: bold;
-  border-radius: 10px;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
   border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
+
 .timer {
   margin-top: 8px;
   text-align: center;
@@ -197,14 +219,9 @@ button {
   font-weight: bold;
   color: #ff6b00;
 }
+
 .message {
   margin-top: 8px;
-}
-.card {
-  background: #fff;
-  padding: 16px;
-  border-radius: 10px;
-  margin-bottom: 16px;
 }
 
 .primary-btn,
@@ -226,6 +243,7 @@ button {
   background: #2563eb;
   color: #ffffff;
 }
+
 .primary-btn:hover {
   background: #1d4ed8;
 }
@@ -234,6 +252,7 @@ button {
   background: #10b981;
   color: #ffffff;
 }
+
 .secondary-btn:hover {
   background: #059669;
 }
@@ -243,6 +262,7 @@ button {
   color: #ffffff;
   margin-top: 10px;
 }
+
 .logout-btn:hover {
   background: #dc2626;
 }

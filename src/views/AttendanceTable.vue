@@ -69,6 +69,7 @@
           <tr>
             <th>ชื่อ-นามสกุล</th>
             <th>รหัสนักศึกษา</th>
+            <th>สถานะ</th>
             <th>เวลาเช็คชื่อ</th>
             <th>จัดการ</th>
           </tr>
@@ -248,6 +249,7 @@ h2 {
   border-radius: 14px;
   margin-bottom: 20px;
 }
+
 .cardlist {
   background: #ffffff;
   padding: 20px;

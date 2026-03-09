@@ -1,64 +1,98 @@
 <template>
-  <div class="container">
-    <h2>📋 ตารางรายชื่อนักเรียน</h2>
+  <div class="containerbg">
+    <div class="container">
+      <div class="card">
+        <h2>📋 ตารางรายชื่อนักเรียน</h2>
+        <div class="toolbar">
+          <label>
+            📅 เลือกวันที่:
+            <input type="date" v-model="selectedDate" @change="loadData" />
+          </label>
 
-    <button class="back-btn" @click="goBack">
-      ⬅ กลับหน้าอาจารย์
-    </button>
-    <h2>📋 ตารางรายชื่อนักเรียน</h2>
-    <p class="teacher-name">
-      👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
-    </p>
+          <button class="refresh-btn" @click="loadData">
+            🔄 รีเฟรช
+          </button>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <label>
-        📅 เลือกวันที่:
-        <input type="date" v-model="selectedDate" @change="loadData" />
-      </label>
+          <button class="clear-btn" @click="clearDate">
+            ❌ ล้างวันที่
+          </button>
+        </div>
+      </div>
 
-      <button class="refresh-btn" @click="loadData">
-        🔄 รีเฟรช
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat blue">
+          <div class="num">{{ rows.length }}</div>
+          <div>นักเรียนทั้งหมด</div>
+        </div>
+
+        <div class="stat green">
+          <div class="num">0</div>
+          <div>มาเรียน</div>
+        </div>
+
+        <div class="stat red">
+          <div class="num">0</div>
+          <div>ขาดเรียน</div>
+        </div>
+
+        <div class="stat yellow">
+          <div class="num">0</div>
+          <div>มาสาย</div>
+        </div>
+
+        <div class="stat gray">
+          <div class="num">0</div>
+          <div>ลา</div>
+        </div>
+      </div>
+      
+      <h2>📋 ตารางรายชื่อนักเรียน</h2>
+      <p class="teacher-name">
+        👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+      </p>
+
+      <!-- Toolbar -->
+
+
+      <button class="download-btn" @click="downloadCSV">
+        ⬇ ดาวน์โหลดตาราง (CSV)
       </button>
 
-      <button class="clear-btn" @click="clearDate">
-        ❌ ล้างวันที่
+      <button class="back-btn" @click="goBack">
+        ⬅ กลับหน้าอาจารย์
       </button>
+
+      <p v-if="message" class="message">{{ message }}</p>
+
+      <!-- Table -->
+      <table v-if="rows.length">
+        <thead>
+          <tr>
+            <th>ชื่อ-นามสกุล</th>
+            <th>รหัสนักศึกษา</th>
+            <th>เวลาเช็คชื่อ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in rows" :key="row.attendance_id">
+            <td>{{ row.fullname }}</td>
+            <td>{{ row.student_code }}</td>
+            <td>{{ formatDate(row.checked_at) }}</td>
+            <td>
+              <button class="delete-btn" @click="deleteRow(row)">
+                🗑 ลบ
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p v-if="!rows.length && !message" class="empty">
+        ยังไม่มีข้อมูลนักเรียน
+      </p>
     </div>
-
-    <button class="download-btn" @click="downloadCSV">
-      ⬇ ดาวน์โหลดตาราง (CSV)
-    </button>
-
-    <p v-if="message" class="message">{{ message }}</p>
-
-    <!-- Table -->
-    <table v-if="rows.length">
-      <thead>
-        <tr>
-          <th>ชื่อ-นามสกุล</th>
-          <th>รหัสนักศึกษา</th>
-          <th>เวลาเช็คชื่อ</th>
-          <th>จัดการ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.attendance_id">
-          <td>{{ row.fullname }}</td>
-          <td>{{ row.student_code }}</td>
-          <td>{{ formatDate(row.checked_at) }}</td>
-          <td>
-            <button class="delete-btn" @click="deleteRow(row)">
-              🗑 ลบ
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p v-if="!rows.length && !message" class="empty">
-      ยังไม่มีข้อมูลนักเรียน
-    </p>
   </div>
 </template>
 
@@ -190,19 +224,71 @@ onMounted(loadData)
 
 <style scoped>
 /* ===== Layout ===== */
+.containerbg {
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
+  min-height: 100vh;
+  padding: 30px 15px;
+}
+
 .container {
   max-width: 1000px;
   margin: 30px auto;
   padding: 22px;
-  background: #ffffff;
+  background: transparent;
   border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
 h2 {
   margin-bottom: 12px;
   color: #1f2937;
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.stat .num {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.blue {
+  color: #2563eb
+}
+
+.green {
+  color: #10b981
+}
+
+.red {
+  color: #ef4444
+}
+
+.yellow {
+  color: #f59e0b
+}
+
+.gray {
+  color: #6b7280
 }
 
 /* ===== Buttons ===== */
@@ -214,26 +300,41 @@ button {
 }
 
 .back-btn {
-  background: #e5e7eb;
+   background: #ef4444;
+  color: #ffffff;
   border: none;
   padding: 6px 12px;
   margin-bottom: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .back-btn:hover {
-  background: #d1d5db;
+  background: #cf3b3b;
 }
 
 .download-btn {
   margin-top: 10px;
-  background: #10b981;
-  color: white;
+  background: linear-gradient(90deg, #b94cc6, #1de0c9);
+  color: #ffffff;
   border: none;
   padding: 8px 14px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .download-btn:hover {
-  background: #059669;
+  background: linear-gradient(90deg, #973fa1, #16ab99);
 }
 
 /* ===== Toolbar ===== */
@@ -242,7 +343,7 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  background: #f9fafb;
+  background: #ffffff;
   padding: 10px;
   border-radius: 10px;
   margin: 12px 0;
@@ -250,7 +351,7 @@ button {
 
 .toolbar label {
   font-size: 14px;
-  color: #374151;
+  color: #ffffff;
 }
 
 .toolbar input[type="date"] {
@@ -341,10 +442,10 @@ tbody tr:hover {
     font-size: 13px;
   }
 }
+
 .teacher-name {
   margin-bottom: 10px;
   color: #374151;
   font-size: 15px;
 }
-
 </style>

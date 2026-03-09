@@ -171,7 +171,7 @@ h2 {
   background: #c6ced5;
 }
 
-/* ===== Buttons ===== */
+/* ===== Buttons == */
 button {
   width: 100%;
   padding: 12px;

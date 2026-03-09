@@ -75,17 +75,43 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in rows" :key="row.attendance_id">
-            <td>{{ row.fullname }}</td>
-            <td>{{ row.student_code }}</td>
-            <td>{{ formatDate(row.checked_at) }}</td>
-            <td>
-              <button class="delete-btn" @click="deleteRow(row)">
-                🗑 ลบ
-              </button>
-            </td>
-          </tr>
-        </tbody>
+  <tr v-for="row in rows" :key="row.attendance_id">
+    <td>{{ row.fullname }}</td>
+
+    <td>{{ row.student_code }}</td>
+
+    <!-- สถานะ -->
+    <td>
+      <span v-if="row.status === 'present'" class="present">
+        ✅ มา
+      </span>
+
+      <span v-else-if="row.status === 'late'" class="late">
+        ⏰ มาสาย
+      </span>
+
+      <span v-else-if="row.status === 'leave'" class="leave">
+        📝 ลา
+      </span>
+
+      <span v-else class="absent">
+        ❌ ขาด
+      </span>
+    </td>
+
+    <!-- เวลา -->
+    <td>
+      {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
+    </td>
+
+    <td>
+      <button class="delete-btn" @click="deleteRow(row)">
+        🗑 ลบ
+      </button>
+    </td>
+
+  </tr>
+</tbody>
       </table>
 
       <p v-if="!rows.length && !message" class="empty">

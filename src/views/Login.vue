@@ -192,12 +192,12 @@ button {
 }
 
 .secondary-btn {
-  background: #9ca3af;
-  color: white;
+  background: linear-gradient(90deg, #10c98e, #16ab99);
+  color: #ffffff;
 }
 
 .secondary-btn:hover {
-  background: #6b7280;
+  background: #059669;
 }
 
 /* ===== Message ===== */

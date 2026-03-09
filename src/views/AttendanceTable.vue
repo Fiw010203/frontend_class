@@ -46,15 +46,13 @@
           <div>ลา</div>
         </div>
       </div>
-      
-      <h2>📋 ตารางรายชื่อนักเรียน</h2>
-      <p class="teacher-name">
-        👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
-      </p>
-
+      <div class="cardlist">
+        <h2>📋 ตารางรายชื่อนักเรียน</h2>
+        <p class="teacher-name">
+          👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+        </p>
+      </div>
       <!-- Toolbar -->
-
-
       <button class="download-btn" @click="downloadCSV">
         ⬇ ดาวน์โหลดตาราง (CSV)
       </button>
@@ -245,6 +243,12 @@ h2 {
 }
 
 .card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+.cardlist {
   background: #ffffff;
   padding: 20px;
   border-radius: 14px;

@@ -191,14 +191,13 @@ button {
 }
 
 .secondary-btn {
-  background: #e5e7eb;
+  background: #ef4444;
   color: #1f2937;
 }
 
 .secondary-btn:hover {
-  background: #d1d5db;
+  background: #dc2626;
 }
-
 /* ===== Message ===== */
 .message {
   margin-top: 14px;

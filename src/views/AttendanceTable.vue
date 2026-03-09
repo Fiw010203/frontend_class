@@ -300,7 +300,7 @@ button {
 }
 
 .back-btn {
-   background: #ef4444;
+  background: #ef4444;
   color: #ffffff;
   border: none;
   padding: 6px 12px;

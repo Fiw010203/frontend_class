@@ -142,6 +142,7 @@ const rows = ref([])
 const message = ref("")
 const selectedDate = ref(getToday())
 const teacherName = ref("")
+const file = ref(null)
 /* ================= STATS ================= */
 
 const presentCount = computed(() =>
@@ -159,6 +160,43 @@ const lateCount = computed(() =>
 const leaveCount = computed(() =>
   rows.value.filter(r => r.status === "leave").length
 )
+const handleFile = (e) => {
+  file.value = e.target.files[0]
+}
+
+const uploadFile = async () => {
+  if (!file.value) {
+    alert("กรุณาเลือกไฟล์ CSV")
+    return
+  }
+
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (!user || user.role !== "teacher") {
+    alert("กรุณาเข้าสู่ระบบอาจารย์")
+    return
+  }
+
+  const formData = new FormData()
+  formData.append("file", file.value)
+
+  try {
+    const res = await fetch(
+      apiPath(`/attendance/students/import?teacherId=${user.id}`),
+      {
+        method: "POST",
+        body: formData
+      }
+    )
+
+    const data = await res.json()
+    alert(data.message)
+    loadData() // reload ตาราง
+  } catch (err) {
+    alert("อัปโหลดไฟล์ไม่สำเร็จ")
+  }
+}
+
+
 /* ================= UTILS ================= */
 function getToday() {
   const d = new Date()
@@ -208,28 +246,30 @@ const loadData = async () => {
 
 /* ================= DELETE ================= */
 const deleteRow = async (row) => {
-  const ok = confirm(`ต้องการลบรายการของ ${row.fullname} ใช่หรือไม่?`)
+  const ok = confirm(`ถอนรายชื่อ ${row.fullname} ออกจากคลาสใช่ไหม?`)
   if (!ok) return
 
   try {
     const res = await fetch(
-      apiPath(`/attendance/${row.attendance_id}`),
+      apiPath(`/attendance/student/${row.student_id}`),
       { method: "DELETE" }
     )
 
     if (!res.ok) {
-      message.value = "❌ ลบรายการไม่สำเร็จ"
+      message.value = "❌ ถอนรายชื่อไม่สำเร็จ"
       return
     }
 
+    // เอาออกจากตารางทันที
     rows.value = rows.value.filter(
-      (r) => r.attendance_id !== row.attendance_id
+      r => r.student_id !== row.student_id
     )
   } catch (err) {
-    console.error("DELETE ERROR:", err)
+    console.error(err)
     message.value = "❌ เชื่อมต่อ backend ไม่ได้"
   }
 }
+
 
 /* ================= CSV ================= */
 const downloadCSV = () => {
@@ -268,6 +308,78 @@ onMounted(() => {
   }
   loadData()
 })
+/* ================= EDIT ================= */
+const editRow = (row) => {
+  row._oldStatus = row.status
+  row.editing = true
+}
+
+const cancelEdit = (row) => {
+  row.status = row._oldStatus
+  row.editing = false
+}
+
+const saveRow = async (row) => {
+  try {
+
+    // ถ้ายังไม่มี attendance_id → ใช้ API สร้างใหม่
+    if (!row.attendance_id) {
+
+      const user = JSON.parse(localStorage.getItem("user"))
+
+      const res = await fetch(
+        apiPath(`/attendance/update-status`),
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            studentId: row.student_id,
+            status: row.status,
+            teacherId: user.id,
+            date: selectedDate.value
+          })
+        }
+      )
+
+      if (!res.ok) {
+        alert("❌ แก้ไขไม่สำเร็จ")
+        return
+      }
+
+    } else {
+
+      // ถ้ามีอยู่แล้ว → update ปกติ
+      const res = await fetch(
+        apiPath(`/attendance/${row.attendance_id}`),
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            status: row.status
+          })
+        }
+      )
+
+      if (!res.ok) {
+        alert("❌ แก้ไขไม่สำเร็จ")
+        return
+      }
+    }
+
+    row.editing = false
+    message.value = "✅ แก้ไขสถานะเรียบร้อย"
+    loadData() // รีโหลดเพื่อเอา attendance_id ใหม่
+
+  } catch (err) {
+    console.error("EDIT ERROR:", err)
+    alert("❌ เชื่อมต่อ backend ไม่ได้")
+  }
+}
+
 
 onMounted(loadData)
 </script>

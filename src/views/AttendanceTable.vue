@@ -18,7 +18,17 @@
           </button>
         </div>
       </div>
+<!-- ===== Import CSV ===== -->
+    <section class="card">
+      <h3>📥 นำเข้าข้อมูลนักศึกษา</h3>
 
+      <div class="import-box">
+        <input type="file" accept=".csv" @change="handleFile" />
+        <button class="import-btn" @click="uploadFile">
+          📤 นำเข้ารหัสนิสิต
+        </button>
+      </div>
+    </section>
       <!-- Stats -->
       <div class="stats">
         <div class="stat blue">
@@ -27,22 +37,22 @@
         </div>
 
         <div class="stat green">
-          <div class="num">0</div>
+          <div class="num">{{ presentCount }}</div>
           <div>มาเรียน</div>
         </div>
 
         <div class="stat red">
-          <div class="num">0</div>
+          <div class="num">{{ absentCount }}</div>
           <div>ขาดเรียน</div>
         </div>
 
         <div class="stat yellow">
-          <div class="num">0</div>
+          <div class="num">{{ lateCount }}</div>
           <div>มาสาย</div>
         </div>
 
         <div class="stat gray">
-          <div class="num">0</div>
+          <div class="num">{{ leaveCount }}</div>
           <div>ลา</div>
         </div>
       </div>
@@ -75,43 +85,43 @@
           </tr>
         </thead>
         <tbody>
-  <tr v-for="row in rows" :key="row.attendance_id">
-    <td>{{ row.fullname }}</td>
+          <tr v-for="row in rows" :key="row.attendance_id">
+            <td>{{ row.fullname }}</td>
 
-    <td>{{ row.student_code }}</td>
+            <td>{{ row.student_code }}</td>
 
-    <!-- สถานะ -->
-    <td>
-      <span v-if="row.status === 'present'" class="present">
-        ✅ มา
-      </span>
+            <!-- สถานะ -->
+            <td>
+              <span v-if="row.status === 'present'" class="present">
+                ✅ มา
+              </span>
 
-      <span v-else-if="row.status === 'late'" class="late">
-        ⏰ มาสาย
-      </span>
+              <span v-else-if="row.status === 'late'" class="late">
+                ⏰ มาสาย
+              </span>
 
-      <span v-else-if="row.status === 'leave'" class="leave">
-        📝 ลา
-      </span>
+              <span v-else-if="row.status === 'leave'" class="leave">
+                📝 ลา
+              </span>
 
-      <span v-else class="absent">
-        ❌ ขาด
-      </span>
-    </td>
+              <span v-else class="absent">
+                ❌ ขาด
+              </span>
+            </td>
 
-    <!-- เวลา -->
-    <td>
-      {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
-    </td>
+            <!-- เวลา -->
+            <td>
+              {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
+            </td>
 
-    <td>
-      <button class="delete-btn" @click="deleteRow(row)">
-        🗑 ลบ
-      </button>
-    </td>
+            <td>
+              <button class="delete-btn" @click="deleteRow(row)">
+                🗑 ลบ
+              </button>
+            </td>
 
-  </tr>
-</tbody>
+          </tr>
+        </tbody>
       </table>
 
       <p v-if="!rows.length && !message" class="empty">
@@ -122,7 +132,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRouter } from "vue-router"
 import { apiPath } from "../api.js"
 
@@ -132,7 +142,23 @@ const rows = ref([])
 const message = ref("")
 const selectedDate = ref(getToday())
 const teacherName = ref("")
+/* ================= STATS ================= */
 
+const presentCount = computed(() =>
+  rows.value.filter(r => r.status === "present").length
+)
+
+const absentCount = computed(() =>
+  rows.value.filter(r => r.status === "absent").length
+)
+
+const lateCount = computed(() =>
+  rows.value.filter(r => r.status === "late").length
+)
+
+const leaveCount = computed(() =>
+  rows.value.filter(r => r.status === "leave").length
+)
 /* ================= UTILS ================= */
 function getToday() {
   const d = new Date()

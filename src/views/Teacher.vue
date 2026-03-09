@@ -250,7 +250,7 @@ button {
 }
 
 .secondary-btn {
-  background: #10b981;
+  background: linear-gradient(90deg, #10c98e, #16ab99);
   color: #ffffff;
 }
 

@@ -116,7 +116,7 @@
 
             <td>
               <button class="delete-btn" @click="deleteRow(row)">
-                🗑 ลบ
+                🗑 ลบ 🗑
               </button>
             </td>
 

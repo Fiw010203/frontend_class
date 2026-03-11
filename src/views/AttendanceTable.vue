@@ -18,17 +18,20 @@
           </button>
         </div>
       </div>
-<!-- ===== Import CSV ===== -->
-    <section class="card">
-      <h3>📥 นำเข้าข้อมูลนักศึกษา</h3>
+      <!-- ===== Import CSV ===== -->
+      <section class="card">
+        <h3>📥 นำเข้าข้อมูลนักศึกษา</h3>
 
-      <div class="import-box">
-        <input type="file" accept=".csv" @change="handleFile" />
-        <button class="import-btn" @click="uploadFile">
-          📤 นำเข้ารหัสนิสิต
-        </button>
-      </div>
-    </section>
+        <div class="import-box">
+          <input id="csvFile" type="file" accept=".csv" @change="handleFile" hidden />
+          <label for="csvFile" class="upload-btn">
+            Upload CSV
+          </label>
+          <button class="import-btn" @click="uploadFile">
+            📤 นำเข้ารหัสนิสิต
+          </button>
+        </div>
+      </section>
       <!-- Stats -->
       <div class="stats">
         <div class="stat blue">
@@ -46,22 +49,66 @@
           <div>ขาดเรียน</div>
         </div>
 
-        <div class="stat yellow">
-          <div class="num">{{ lateCount }}</div>
-          <div>มาสาย</div>
-        </div>
+        
 
-        <div class="stat gray">
-          <div class="num">{{ leaveCount }}</div>
-          <div>ลา</div>
-        </div>
       </div>
       <div class="cardlist">
         <h2>📋 ตารางรายชื่อนักเรียน</h2>
         <p class="teacher-name">
           👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
         </p>
+
+        <!-- Table -->
+        <table v-if="rows.length">
+          <thead>
+            <tr>
+              <th>ชื่อ-นามสกุล</th>
+              <th>รหัสนักศึกษา</th>
+              <th>สถานะ</th>
+              <th>เวลาเช็คชื่อ</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in rows" :key="row.attendance_id">
+              <td>{{ row.fullname }}</td>
+
+              <td>{{ row.student_code }}</td>
+
+              <!-- สถานะ -->
+              <td>
+                <span v-if="row.status === 'present'" class="present">
+                  ✅ มา
+                </span>
+
+                <span v-else-if="row.status === 'late'" class="late">
+                  ⏰ มาสาย
+                </span>
+
+                <span v-else-if="row.status === 'leave'" class="leave">
+                  📝 ลา
+                </span>
+
+                <span v-else class="absent">
+                  ❌ ขาด
+                </span>
+              </td>
+
+              <!-- เวลา -->
+              <td>
+                {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
+              </td>
+
+              <td>
+                <button class="delete-btn" @click="deleteRow(row)">
+                  🗑 ลบ
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
       <!-- Toolbar -->
       <button class="download-btn" @click="downloadCSV">
         ⬇ ดาวน์โหลดตาราง (CSV)
@@ -73,56 +120,7 @@
 
       <p v-if="message" class="message">{{ message }}</p>
 
-      <!-- Table -->
-      <table v-if="rows.length">
-        <thead>
-          <tr>
-            <th>ชื่อ-นามสกุล</th>
-            <th>รหัสนักศึกษา</th>
-            <th>สถานะ</th>
-            <th>เวลาเช็คชื่อ</th>
-            <th>จัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="row in rows" :key="row.attendance_id">
-            <td>{{ row.fullname }}</td>
 
-            <td>{{ row.student_code }}</td>
-
-            <!-- สถานะ -->
-            <td>
-              <span v-if="row.status === 'present'" class="present">
-                ✅ มา
-              </span>
-
-              <span v-else-if="row.status === 'late'" class="late">
-                ⏰ มาสาย
-              </span>
-
-              <span v-else-if="row.status === 'leave'" class="leave">
-                📝 ลา
-              </span>
-
-              <span v-else class="absent">
-                ❌ ขาด
-              </span>
-            </td>
-
-            <!-- เวลา -->
-            <td>
-              {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
-            </td>
-
-            <td>
-              <button class="delete-btn" @click="deleteRow(row)">
-                🗑 ลบ
-              </button>
-            </td>
-
-          </tr>
-        </tbody>
-      </table>
 
       <p v-if="!rows.length && !message" class="empty">
         ยังไม่มีข้อมูลนักเรียน
@@ -507,6 +505,13 @@ button {
   background: linear-gradient(90deg, #973fa1, #16ab99);
 }
 
+.import-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
 /* ===== Toolbar ===== */
 .toolbar {
   display: flex;
@@ -552,6 +557,30 @@ button {
   background: #d97706;
 }
 
+.import-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+}
+
+.import-btn:hover {
+  background: #059669;
+}
+
+.upload-btn {
+  padding: 6px 12px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.upload-btn:hover {
+  background: #2563eb;
+}
+
 /* ===== Table ===== */
 table {
   width: 100%;
@@ -572,6 +601,10 @@ td {
 
 th {
   color: #374151;
+}
+
+td {
+  text-align: center;
 }
 
 tbody tr:hover {

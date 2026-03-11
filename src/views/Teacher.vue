@@ -49,6 +49,8 @@ const router = useRouter()
 const code = ref("")
 const message = ref("")
 const timeLeft = ref(0)
+const teacherName = ref("")
+
 let timer = null
 
 /* ================= COUNTDOWN ================= */
@@ -112,16 +114,9 @@ const generateCode = async () => {
 
     const data = await res.json()
 
-    // ✅ กรณียังมีรหัสอยู่ (409)
-    if (res.status === 409 && data.active) {
+    if (!res.ok && data.active) {
       code.value = data.code
-      message.value = "ℹ️ ยังมีรหัสที่ใช้งานอยู่"
       startCountdown(data.expiresAt)
-      return
-    }
-
-    if (!res.ok) {
-      message.value = data.message || "❌ สร้างรหัสไม่สำเร็จ"
       return
     }
 
@@ -136,7 +131,14 @@ const generateCode = async () => {
 }
 
 /* ================= LIFECYCLE ================= */
-onMounted(loadActiveCode)
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (user?.role === "teacher") {
+    teacherName.value = user.fullname || user.username
+  }
+  loadActiveCode()
+})
+
 onUnmounted(() => clearInterval(timer))
 
 /* ================= NAV ================= */
@@ -149,7 +151,6 @@ const logout = () => {
   router.push("/")
 }
 </script>
-
 
 <style scoped>
 /* ===== Layout ===== */
@@ -189,14 +190,23 @@ const logout = () => {
 
 h2 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 32px;
+}
+
+.header h2 {
+  margin-bottom: 6px;
   color: #1f2937;
+}
+
+.teacher-name {
+  color: #4b5563;
+  font-size: 15px;
 }
 
 /* ===== Card ===== */
 
 .card h3 {
-  margin-bottom: 15px;
+  margin-bottom: 14px;
   color: #111827;
 }
 
@@ -261,44 +271,50 @@ button {
 .logout-btn {
   background: #ef4444;
   color: #ffffff;
-  margin-top: 10px;
 }
 
 .logout-btn:hover {
   background: #dc2626;
 }
 
-/* ===== Code Display ===== */
+/* ===== Code ===== */
 .code-box {
-  margin-top: 15px;
-  padding: 12px;
+  margin-top: 16px;
+  padding: 16px;
   background: #eef2ff;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 12px;
   text-align: center;
 }
 
 .code-box span {
+  display: block;
+  font-size: 28px;
   font-weight: bold;
   color: #1d4ed8;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
-/* ===== Message ===== */
+/* ===== Timer & Message ===== */
+.timer {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff6b00;
+}
+
 .message {
   margin-top: 10px;
+  text-align: center;
   font-size: 14px;
   color: #374151;
 }
 
 /* ===== Responsive ===== */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
   .container {
-    padding: 18px;
-  }
-
-  button {
-    font-size: 14px;
+    padding: 20px;
   }
 }
 </style>

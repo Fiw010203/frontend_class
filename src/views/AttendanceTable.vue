@@ -384,6 +384,22 @@ onMounted(loadData)
 
 
 <style scoped>
+/* ===== Status Badge ===== */
+.present {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.absent {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.leave {
+  color: #d97706;
+  font-weight: 600;
+}
+
 /* ===== Layout ===== */
 .containerbg {
   background: linear-gradient(90deg, #5f6de8, #b94cc6);
@@ -401,8 +417,14 @@ onMounted(loadData)
 }
 
 h2 {
-  margin-bottom: 12px;
-  color: #1f2937;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.teacher-name {
+  margin-bottom: 14px;
+  color: #374151;
+  font-size: 15px;
 }
 
 .card {
@@ -465,6 +487,7 @@ button {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  border: none;
 }
 
 .back-btn {
@@ -530,7 +553,7 @@ button {
 }
 
 .toolbar input[type="date"] {
-  padding: 6px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #d1d5db;
 }
@@ -538,8 +561,7 @@ button {
 .refresh-btn {
   background: #2563eb;
   color: #fff;
-  border: none;
-  padding: 6px 12px;
+  padding: 6px 14px;
 }
 
 .refresh-btn:hover {
@@ -549,8 +571,7 @@ button {
 .clear-btn {
   background: #f59e0b;
   color: #fff;
-  border: none;
-  padding: 6px 12px;
+  padding: 6px 14px;
 }
 
 .clear-btn:hover {
@@ -585,22 +606,27 @@ button {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin-top: 16px;
   font-size: 14px;
+  table-layout: fixed;
 }
 
 thead {
   background: #f3f4f6;
 }
 
-th,
+th {
+  padding: 12px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
 td {
   padding: 10px;
   border-bottom: 1px solid #e5e7eb;
-}
-
-th {
-  color: #374151;
+  vertical-align: middle;
 }
 
 td {
@@ -611,26 +637,70 @@ tbody tr:hover {
   background: #f9fafb;
 }
 
-/* ===== Delete ===== */
-.delete-btn {
-  background: #ef4444;
-  color: #fff;
-  border: none;
+/* ===== Column Width ===== */
+th:nth-child(1),
+td:nth-child(1) {
+  width: 26%;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 18%;
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 14%;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 22%;
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+  width: 20%;
+  white-space: nowrap;
+}
+
+/* ===== Action Buttons ===== */
+.edit-btn {
+  background: #facc15;
   padding: 6px 10px;
 }
 
-.delete-btn:hover {
+.save-btn {
+  background: #22c55e;
+  color: #fff;
+  padding: 6px 10px;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: #fff;
+  padding: 6px 10px;
+}
+
+.delete-btn {
   background: #dc2626;
+  color: #fff;
+  padding: 6px 10px;
+}
+
+td button {
+  margin-right: 4px;
 }
 
 /* ===== Message ===== */
 .message {
-  margin-top: 10px;
+  margin-top: 12px;
   color: #dc2626;
+  font-size: 14px;
 }
 
 .empty {
-  margin-top: 15px;
+  margin-top: 16px;
   color: #6b7280;
 }
 

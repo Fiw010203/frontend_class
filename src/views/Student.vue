@@ -1,13 +1,24 @@
 <template>
   <div class="container">
     <div class="card">
-      <h2>🎓 นักศึกษา</h2>
+      <!-- Student Info -->
+      <div class="student-info">
+        <div class="avatar">🎓</div>
+        <p class="student-name">{{ studentName }}</p>
+        <p class="student-role">นักศึกษา</p>
+      </div>
+
+      <h2>เช็คชื่อเข้าเรียน</h2>
 
       <p class="subtitle">
         กรุณากรอกรหัสเช็คชื่อจากอาจารย์
       </p>
 
-      <input v-model="code" placeholder="กรอกรหัสเช็คชื่อ" class="code-input" />
+      <input
+        v-model="code"
+        placeholder="กรอกรหัสเช็คชื่อ"
+        class="code-input"
+      />
 
       <button class="checkin-btn" @click="checkin">
         ✅ เช็คชื่อ
@@ -24,8 +35,9 @@
   </div>
 </template>
 
+
 <script setup>
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { useRouter } from "vue-router"
 import { API_BASE } from "../api.js"
 
@@ -33,8 +45,13 @@ const router = useRouter()
 const code = ref("")
 const message = ref("")
 
-// ดึง user จาก localStorage
 const user = JSON.parse(localStorage.getItem("user"))
+
+// ✅ ใช้ computed (ปลอดภัยกว่า)
+const studentName = computed(() => {
+  if (!user) return "ไม่ทราบชื่อ"
+  return user.fullname || user.username || "ไม่ทราบชื่อ"
+})
 
 const checkin = async () => {
   message.value = ""
@@ -57,7 +74,6 @@ const checkin = async () => {
         studentId: user.student_id,
         code: code.value.trim()
       })
-
     })
 
     const data = await res.json()
@@ -81,8 +97,9 @@ const logout = () => {
 }
 </script>
 
+
+
 <style scoped>
-/* ===== Layout ===== */
 .container {
   min-height: 100vh;
   display: flex;
@@ -92,25 +109,54 @@ const logout = () => {
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-/* ===== Card ===== */
 .card {
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
   background: #ffffff;
-  padding: 28px;
-  border-radius: 18px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
   text-align: center;
 }
 
-h2 {
-  margin-bottom: 6px;
+/* ===== Student Info ===== */
+.student-info {
+  margin-bottom: 18px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-name {
+  font-size: 16px;
+  font-weight: bold;
   color: #1f2937;
+}
+
+.student-role {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ===== Text ===== */
+h2 {
+  margin: 10px 0 6px;
+  color: #1e293b;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: #64748b;
   margin-bottom: 18px;
 }
 
@@ -130,7 +176,7 @@ h2 {
 .code-input:focus {
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
 }
 
 /* ===== Buttons ===== */
@@ -165,8 +211,8 @@ button {
 
 /* ===== Message ===== */
 .message {
-  margin-top: 12px;
+  margin-top: 14px;
   font-size: 14px;
-  color: #374151;
+  color: #1f2937;
 }
 </style>

@@ -1,47 +1,41 @@
 <template>
   <div class="container">
-    <!-- ===== Header ===== -->
-    <div class="header">
+    <div class="card">
       <h2>👩‍🏫 หน้าสำหรับอาจารย์</h2>
-      <p class="teacher-name">
-        👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
-      </p>
+
+      <section class="section-card">
+        <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
+
+        <button class="primary-btn" @click="generateCode">
+          ➕ สร้างรหัส
+        </button>
+
+        <p v-if="code" class="code-box">
+          รหัสเช็คชื่อ: <span>{{ code }}</span>
+        </p>
+
+        <p v-if="timeLeft > 0" class="timer">
+          ⏳ เหลือเวลา
+          {{ Math.floor(timeLeft / 60) }}:
+          {{ String(timeLeft % 60).padStart(2, "0") }} นาที
+        </p>
+
+        <p v-if="message" class="message">{{ message }}</p>
+      </section>
+
+      <section class="section-card">
+        <h3>📊 จัดการข้อมูล</h3>
+        <button class="secondary-btn" @click="goToAttendance">
+          📋 ดูตารางรายชื่อนักเรียน
+        </button>
+      </section>
+
+      <section class="section-card1">
+      <button class="logout-btn" @click="logout">
+        🚪 ออกจากระบบ
+      </button>
+      </section>
     </div>
-
-    <!-- ===== Generate Code ===== -->
-    <section class="card">
-      <h3>🔑 สร้างรหัสเช็คชื่อ</h3>
-
-      <button class="primary-btn" @click="generateCode">
-        ➕ สร้างรหัสเช็คชื่อ
-      </button>
-
-      <div v-if="code" class="code-box">
-        <p>รหัสเช็คชื่อ</p>
-        <span>{{ code }}</span>
-      </div>
-
-      <p v-if="timeLeft > 0" class="timer">
-        ⏳ เหลือเวลา
-        {{ Math.floor(timeLeft / 60) }}:
-        {{ String(timeLeft % 60).padStart(2, "0") }} นาที
-      </p>
-
-      <p v-if="message" class="message">{{ message }}</p>
-    </section>
-
-    <!-- ===== Manage ===== -->
-    <section class="card">
-      <h3>📊 จัดการข้อมูล</h3>
-      <button class="secondary-btn" @click="goToAttendance">
-        📋 ดูตารางรายชื่อนักเรียน
-      </button>
-    </section>
-
-    <!-- ===== Logout ===== -->
-    <button class="logout-btn" @click="logout">
-      🚪 ออกจากระบบ
-    </button>
   </div>
 </template>
 
@@ -161,17 +155,40 @@ const logout = () => {
 <style scoped>
 /* ===== Layout ===== */
 .container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 28px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
-/* ===== Header ===== */
-.header {
+.card {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.section-card {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.section-card1 {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+h2 {
   text-align: center;
   margin-bottom: 32px;
 }
@@ -187,13 +204,6 @@ const logout = () => {
 }
 
 /* ===== Card ===== */
-.card {
-  background: #f9fafb;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 22px;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
-}
 
 .card h3 {
   margin-bottom: 14px;
@@ -204,26 +214,56 @@ const logout = () => {
 button {
   width: 100%;
   padding: 12px;
-  font-size: 15px;
-  font-weight: bold;
-  border-radius: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
   border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
 
+.timer {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff6b00;
+}
+
+.message {
+  margin-top: 8px;
+}
+
+.primary-btn,
+.secondary-btn,
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  
+}
+
+.code-box {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+
 .primary-btn {
-  background: #2563eb;
+  background: linear-gradient(90deg, #b94cc6, #1de0c9);
   color: #ffffff;
 }
+
 .primary-btn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(90deg, #973fa1, #16ab99);
 }
 
 .secondary-btn {
-  background: #10b981;
+  background: linear-gradient(90deg, #10c98e, #16ab99);
   color: #ffffff;
 }
+
 .secondary-btn:hover {
   background: #059669;
 }
@@ -232,6 +272,7 @@ button {
   background: #ef4444;
   color: #ffffff;
 }
+
 .logout-btn:hover {
   background: #dc2626;
 }

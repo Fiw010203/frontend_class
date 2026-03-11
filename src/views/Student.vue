@@ -105,7 +105,7 @@ const logout = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f2fe, #f8fafc);
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
@@ -163,12 +163,14 @@ h2 {
 /* ===== Input ===== */
 .code-input {
   width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  text-align: center;
-  border-radius: 12px;
-  border: 1px solid #cbd5e1;
-  letter-spacing: 3px;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
+
 }
 
 .code-input:focus {
@@ -182,21 +184,20 @@ button {
   width: 100%;
   padding: 12px;
   margin-top: 14px;
-  font-size: 15px;
-  font-weight: bold;
-  border-radius: 12px;
+  border-radius: 25px;
   border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #e5e7eb;
 }
 
 .checkin-btn {
-  background: #22c55e;
+  background: linear-gradient(90deg, #b94cc6, #1de0c9);
   color: #ffffff;
 }
 
 .checkin-btn:hover {
-  background: #16a34a;
+  background: linear-gradient(90deg, #973fa1, #16ab99);
 }
 
 .logout-btn {

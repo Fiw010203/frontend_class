@@ -1,126 +1,136 @@
 <template>
-  <div class="container">
-    <!-- ===== Header ===== -->
-    <div class="header">
+  <div class="containerbg">
+    <div class="container">
+      <div class="card">
+        <h2>📋 ตารางรายชื่อนักเรียน</h2>
+        <div class="toolbar">
+          <label>
+            📅 เลือกวันที่:
+            <input type="date" v-model="selectedDate" @change="loadData" />
+          </label>
+
+          <button class="refresh-btn" @click="loadData">
+            🔄 รีเฟรช
+          </button>
+
+          <button class="clear-btn" @click="clearDate">
+            ❌ ล้างวันที่
+          </button>
+        </div>
+      </div>
+      <!-- ===== Import CSV ===== -->
+      <section class="card">
+        <h3>📥 นำเข้าข้อมูลนักศึกษา</h3>
+
+        <div class="import-box">
+          <input id="csvFile" type="file" accept=".csv" @change="handleFile" hidden />
+          <label for="csvFile" class="upload-btn">
+            Upload CSV
+          </label>
+          <button class="import-btn" @click="uploadFile">
+            📤 นำเข้ารหัสนิสิต
+          </button>
+        </div>
+      </section>
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat blue">
+          <div class="num">{{ rows.length }}</div>
+          <div>นักเรียนทั้งหมด</div>
+        </div>
+
+        <div class="stat green">
+          <div class="num">{{ presentCount }}</div>
+          <div>มาเรียน</div>
+        </div>
+
+        <div class="stat red">
+          <div class="num">{{ absentCount }}</div>
+          <div>ขาดเรียน</div>
+        </div>
+
+        
+
+      </div>
+      <div class="cardlist">
+        <h2>📋 ตารางรายชื่อนักเรียน</h2>
+        <p class="teacher-name">
+          👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+        </p>
+
+        <!-- Table -->
+        <table v-if="rows.length">
+          <thead>
+            <tr>
+              <th>ชื่อ-นามสกุล</th>
+              <th>รหัสนักศึกษา</th>
+              <th>สถานะ</th>
+              <th>เวลาเช็คชื่อ</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in rows" :key="row.attendance_id">
+              <td>{{ row.fullname }}</td>
+
+              <td>{{ row.student_code }}</td>
+
+              <!-- สถานะ -->
+              <td>
+                <span v-if="row.status === 'present'" class="present">
+                  ✅ มา
+                </span>
+
+                <span v-else-if="row.status === 'late'" class="late">
+                  ⏰ มาสาย
+                </span>
+
+                <span v-else-if="row.status === 'leave'" class="leave">
+                  📝 ลา
+                </span>
+
+                <span v-else class="absent">
+                  ❌ ขาด
+                </span>
+              </td>
+
+              <!-- เวลา -->
+              <td>
+                {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
+              </td>
+
+              <td>
+                <button class="delete-btn" @click="deleteRow(row)">
+                  🗑 ลบ
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Toolbar -->
+      <button class="download-btn" @click="downloadCSV">
+        ⬇ ดาวน์โหลดตาราง (CSV)
+      </button>
+
       <button class="back-btn" @click="goBack">
         ⬅ กลับหน้าอาจารย์
       </button>
 
-      <h2>📋 ตารางรายชื่อนักเรียน</h2>
+      <p v-if="message" class="message">{{ message }}</p>
 
-      <p class="teacher-name">
-        👨‍🏫 อาจารย์ผู้สอน: <strong>{{ teacherName }}</strong>
+
+
+      <p v-if="!rows.length && !message" class="empty">
+        ยังไม่มีข้อมูลนักเรียน
       </p>
     </div>
-
-    <!-- ===== Import CSV ===== -->
-    <section class="card">
-      <h3>📥 นำเข้าข้อมูลนักศึกษา</h3>
-
-      <div class="import-box">
-        <input type="file" accept=".csv" @change="handleFile" />
-        <button class="import-btn" @click="uploadFile">
-          📤 นำเข้ารหัสนิสิต
-        </button>
-      </div>
-    </section>
-
-    <!-- ===== Toolbar ===== -->
-    <section class="card">
-      <div class="toolbar">
-        <label>
-          📅 เลือกวันที่:
-          <input type="date" v-model="selectedDate" @change="loadData" />
-        </label>
-
-        <button class="refresh-btn" @click="loadData">
-          🔄 รีเฟรช
-        </button>
-
-        <button class="clear-btn" @click="clearDate">
-          ❌ ล้างวันที่
-        </button>
-      </div>
-
-      <button class="download-btn" @click="downloadCSV">
-        ⬇ ดาวน์โหลดตาราง (CSV)
-      </button>
-    </section>
-
-    <!-- ===== Message ===== -->
-    <p v-if="message" class="message">{{ message }}</p>
-
-    <!-- ===== Table ===== -->
-    <table v-if="rows.length">
-      <thead>
-        <tr>
-          <th>ชื่อ-นามสกุล</th>
-          <th>รหัสนักศึกษา</th>
-          <th>สถานะ</th>
-          <th>เวลาเช็คชื่อ</th>
-          <th>จัดการ</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="row in rows" :key="row.student_code">
-          <td>{{ row.fullname }}</td>
-          <td>{{ row.student_code }}</td>
-
-          <!-- สถานะ -->
-          <td>
-            <select v-if="row.editing" v-model="row.status">
-              <option value="present">มา</option>
-              <option value="absent">ขาด</option>
-              <option value="leave">ลา</option>
-            </select>
-
-            <span v-else>
-              <span v-if="row.status === 'present'" class="present">✅ มา</span>
-              <span v-else-if="row.status === 'leave'" class="leave">📝 ลา</span>
-              <span v-else class="absent">❌ ขาด</span>
-            </span>
-          </td>
-
-          <!-- เวลา -->
-          <td>
-            {{ row.checked_at ? formatDate(row.checked_at) : "-" }}
-          </td>
-
-          <!-- จัดการ -->
-          <td class="action-col">
-            <button v-if="!row.editing" class="edit-btn" @click="editRow(row)">
-              ✏️ แก้ไข
-            </button>
-
-
-            <button v-if="row.editing" class="save-btn" @click="saveRow(row)">
-              💾 บันทึก
-            </button>
-
-            <button v-if="row.editing" class="cancel-btn" @click="cancelEdit(row)">
-              ❌ ยกเลิก
-            </button>
-
-            <button v-if="!row.editing" class="delete-btn" @click="deleteRow(row)">
-              🗑 ลบ
-            </button>
-
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- ===== Empty ===== -->
-    <!-- ===== Empty ===== -->
-    <!-- ===== Empty ===== -->
-    <p v-if="!rows.length && !message" class="empty">
-      ยังไม่มีข้อมูลนักเรียน
-    </p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRouter } from "vue-router"
 import { apiPath } from "../api.js"
 
@@ -131,7 +141,23 @@ const message = ref("")
 const selectedDate = ref(getToday())
 const teacherName = ref("")
 const file = ref(null)
+/* ================= STATS ================= */
 
+const presentCount = computed(() =>
+  rows.value.filter(r => r.status === "present").length
+)
+
+const absentCount = computed(() =>
+  rows.value.filter(r => r.status === "absent").length
+)
+
+const lateCount = computed(() =>
+  rows.value.filter(r => r.status === "late").length
+)
+
+const leaveCount = computed(() =>
+  rows.value.filter(r => r.status === "leave").length
+)
 const handleFile = (e) => {
   file.value = e.target.files[0]
 }
@@ -375,13 +401,18 @@ onMounted(loadData)
 }
 
 /* ===== Layout ===== */
+.containerbg {
+  background: linear-gradient(90deg, #5f6de8, #b94cc6);
+  min-height: 100vh;
+  padding: 30px 15px;
+}
+
 .container {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 24px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 22px;
+  background: transparent;
+  border-radius: 14px;
   font-family: "Segoe UI", system-ui, sans-serif;
 }
 
@@ -396,6 +427,60 @@ h2 {
   font-size: 15px;
 }
 
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.cardlist {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.stat .num {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.blue {
+  color: #2563eb
+}
+
+.green {
+  color: #10b981
+}
+
+.red {
+  color: #ef4444
+}
+
+.yellow {
+  color: #f59e0b
+}
+
+.gray {
+  color: #6b7280
+}
+
 /* ===== Buttons ===== */
 button {
   border-radius: 8px;
@@ -406,24 +491,48 @@ button {
 }
 
 .back-btn {
-  background: #e5e7eb;
-  padding: 6px 14px;
-  margin-bottom: 12px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .back-btn:hover {
-  background: #d1d5db;
+  background: #cf3b3b;
 }
 
 .download-btn {
-  margin-top: 12px;
-  background: #10b981;
-  color: #fff;
-  padding: 8px 16px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #b94cc6, #1de0c9);
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 14px;
+  border-radius: 25px;
+  border: none;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .download-btn:hover {
-  background: #059669;
+  background: linear-gradient(90deg, #973fa1, #16ab99);
+}
+
+.import-box {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
 }
 
 /* ===== Toolbar ===== */
@@ -432,16 +541,15 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
-  background: #f9fafb;
-  padding: 12px;
-  border-radius: 12px;
-  margin: 14px 0;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 12px 0;
 }
 
 .toolbar label {
   font-size: 14px;
-  color: #374151;
+  color: #ffffff;
 }
 
 .toolbar input[type="date"] {
@@ -470,6 +578,30 @@ button {
   background: #d97706;
 }
 
+.import-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+}
+
+.import-btn:hover {
+  background: #059669;
+}
+
+.upload-btn {
+  padding: 6px 12px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.upload-btn:hover {
+  background: #2563eb;
+}
+
 /* ===== Table ===== */
 table {
   width: 100%;
@@ -495,6 +627,10 @@ td {
   padding: 10px;
   border-bottom: 1px solid #e5e7eb;
   vertical-align: middle;
+}
+
+td {
+  text-align: center;
 }
 
 tbody tr:hover {
@@ -578,5 +714,11 @@ td button {
   table {
     font-size: 13px;
   }
+}
+
+.teacher-name {
+  margin-bottom: 10px;
+  color: #374151;
+  font-size: 15px;
 }
 </style>

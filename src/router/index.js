@@ -9,16 +9,43 @@ import AttendanceTable from "../views/AttendanceTable.vue"
 const routes = [
   { path: "/", component: Login },
   { path: "/register", component: Register },
-  { path: "/teacher", component: Teacher },
-  { path: "/student", component: Student },
 
-  // ✅ หน้าใหม่ แยกจาก Teacher
-  { path: "/attendance", component: AttendanceTable },
+  { 
+    path: "/teacher", 
+    component: Teacher,
+    meta: { requiresAuth: true }
+  },
+
+  { 
+    path: "/student", 
+    component: Student,
+    meta: { requiresAuth: true }
+  },
+
+  { 
+    path: "/attendance", 
+    component: AttendanceTable,
+    meta: { requiresAuth: true }
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+
+// 🔐 ตรวจสอบ login
+router.beforeEach((to, from, next) => {
+
+  const user = localStorage.getItem("user")
+
+  if (to.meta.requiresAuth && !user) {
+    next("/") // กลับไปหน้า login
+  } else {
+    next()
+  }
+
 })
 
 export default router

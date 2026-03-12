@@ -33,7 +33,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import { API_BASE } from "../api.js"
 
@@ -42,6 +42,20 @@ const router = useRouter()
 const username = ref("")
 const password = ref("")
 const message = ref("")
+
+// 🔐 ถ้า login แล้ว ไม่ให้กลับมาหน้า login
+onMounted(() => {
+  const user = localStorage.getItem("user")
+  if (user) {
+    const parsed = JSON.parse(user)
+
+    if (parsed.role === "teacher") {
+      router.replace("/teacher")
+    } else {
+      router.replace("/student")
+    }
+  }
+})
 
 const login = async () => {
   message.value = ""
@@ -70,13 +84,16 @@ const login = async () => {
       return
     }
 
+    // 💾 เก็บ user
     localStorage.setItem("user", JSON.stringify(data.user))
 
+    // 🔀 redirect ตาม role
     if (data.user.role === "teacher") {
-      router.push("/teacher")
+      router.replace("/teacher")
     } else {
-      router.push("/student")
+      router.replace("/student")
     }
+
   } catch (err) {
     console.error("LOGIN ERROR:", err)
     message.value = "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
